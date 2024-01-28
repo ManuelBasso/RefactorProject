@@ -1,4 +1,4 @@
-package com.develhope.spring;
+package com.develhope.spring.entities.entities;
 
 import lombok.Data;
 
