@@ -1,4 +1,4 @@
-package com.develhope.spring.entities.entities;
+package com.develhope.spring.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
