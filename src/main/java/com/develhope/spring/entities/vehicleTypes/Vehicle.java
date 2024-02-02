@@ -1,4 +1,4 @@
-package com.develhope.spring.entities;
+package com.develhope.spring.entities.vehicleTypes;
 
 import lombok.Data;
 

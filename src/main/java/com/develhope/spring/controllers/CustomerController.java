@@ -1,6 +1,7 @@
 package com.develhope.spring.controllers;
-import com.develhope.spring.entities.Customer;
 import org.springframework.web.bind.annotation.*;
+
+import com.develhope.spring.entities.typeOfUsers.Customer;
 
 import java.util.List;
 
