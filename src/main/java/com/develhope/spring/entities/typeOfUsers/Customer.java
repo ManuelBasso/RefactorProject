@@ -3,7 +3,7 @@ package com.develhope.spring.entities.typeOfUsers;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
+
 
 @Data
 @Table(name = "customers")
