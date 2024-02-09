@@ -1,33 +1,19 @@
 package com.develhope.spring.entities.typeOfUsers;
 
+import com.develhope.spring.configurations.Role;
+
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Data
 @Table(name = "sellers")
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Seller {
+public class Seller extends User {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
+    Role role = Role.ROLE_SELLER;
 
     @Column(nullable = false, unique = true)
     private String phoneNumber;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    @Column(nullable = false)
-    private String password;
 }
