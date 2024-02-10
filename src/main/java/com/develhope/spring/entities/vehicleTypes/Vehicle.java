@@ -1,9 +1,20 @@
 package com.develhope.spring.entities.vehicleTypes;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Table
+@Entity
+@AllArgsConstructor
+@NoArgsConstructor
 public class Vehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String brand;               // Marca
     private String model;               // Modello

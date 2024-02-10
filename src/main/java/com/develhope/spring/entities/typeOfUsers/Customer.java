@@ -14,6 +14,10 @@ public class Customer extends User {
 
     Role role = Role.ROLE_CUSTOMER;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
+
     @Column(nullable = false, unique = true)
     private String phoneNumber;
 

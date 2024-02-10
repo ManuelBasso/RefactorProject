@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
 @RequestMapping("/seller")
-
 public class SellerController {
     
 }
