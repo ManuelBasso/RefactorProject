@@ -5,20 +5,11 @@ import com.develhope.spring.configurations.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
-@Table(name = "customers")
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
+@Data
 public class Customer extends User {
 
-    Role role = Role.ROLE_CUSTOMER;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
-
-    @Column(nullable = false, unique = true)
+    private Role role = Role.ROLE_CUSTOMER;
     private String phoneNumber;
 
 }

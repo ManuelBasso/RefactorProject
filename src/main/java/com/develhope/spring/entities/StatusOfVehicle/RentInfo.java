@@ -15,7 +15,7 @@ public class RentInfo {
 
   //  @ManyToOne
     //@JoinColumn(name = "vehicle_id")
-    private Vehicle vehicle;
+    //private Vehicle vehicle;
 
     private LocalDate startDate; // Data inizio noleggio
     private LocalDate endDate;   // Data fine noleggio

@@ -6,9 +6,12 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
+@Table
+@Entity
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -22,7 +25,7 @@ public class User {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String password;
 
     @Enumerated(EnumType.STRING)
