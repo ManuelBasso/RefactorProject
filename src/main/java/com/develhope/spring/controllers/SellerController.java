@@ -16,9 +16,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestMapping;
 
-@Controller
-@RequestMapping("/seller") //How will the complete URL look like?
+
+
+@RestController
+@RequestMapping("/seller")
 public class SellerController {
 
     @Autowired

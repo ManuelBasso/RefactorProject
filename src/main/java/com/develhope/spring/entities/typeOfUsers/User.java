@@ -6,19 +6,25 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Data
-@Table(name = "customers")
-@Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Customer extends User {
-
-    Role role = Role.ROLE_CUSTOMER;
-
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(nullable = false, unique = true)
-    private String phoneNumber;
+    @Column(nullable = false)
+    private String firstName;
 
+    @Column(nullable = false)
+    private String lastName;
+
+    @Column(nullable = false, unique = true)
+    private String email;
+
+    @Column(nullable = false, unique = true)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 }
