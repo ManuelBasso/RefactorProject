@@ -1,4 +1,5 @@
-package com.develhope.spring.controllers;
+/*package com.develhope.spring.controllers;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -38,3 +39,5 @@ public class LoginController {
         return "redirect:" + redirectUrl;
     }
 }
+
+ */

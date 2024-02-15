@@ -13,8 +13,8 @@ public class RentInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "vehicle_id")
+  //  @ManyToOne
+    //@JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
     private LocalDate startDate; // Data inizio noleggio
