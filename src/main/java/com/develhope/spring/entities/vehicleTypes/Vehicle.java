@@ -6,10 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Table
 @Entity
-@AllArgsConstructor
+@Table
 @NoArgsConstructor
+@AllArgsConstructor
 public class Vehicle {
 
     @Id
@@ -31,7 +31,7 @@ public class Vehicle {
     private Double discount;            // Eventuale sconto sul prezzo di listino
 
     private Boolean isNew;              // Flag che identifica se il veicolo è nuovo o usato
-    private Boolean isAvailable;        // Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
+    private Enum<VehicleStatus> isAvailable;// Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
 
 }
 
