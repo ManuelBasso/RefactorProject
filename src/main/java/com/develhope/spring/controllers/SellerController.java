@@ -7,6 +7,7 @@ import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import com.develhope.spring.entities.vehicleTypes.VehicleStatus;
 import com.develhope.spring.repositories.OrderRepository;
 import com.develhope.spring.repositories.VehicleRepository;
+import com.develhope.spring.services.RentService;
 import com.develhope.spring.services.SellerService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,15 +37,18 @@ public class SellerController {
     @Autowired
     private SellerService sellerService;
 
+    @Autowired
+    private RentService rentService;
+
     //TODO Control null cases, wrong inputs etc...
 
     @GetMapping("/vehicleinfo/{id}")
-    public @ResponseBody Vehicle getOneVehicle(@PathVariable Long id) {
+    public Optional<Vehicle> getOneVehicle(@PathVariable Long id) {
         return sellerService.getOneVehicleById(id);
     }
 
-    @PostMapping("/createorder")
-    public @ResponseBody OrderInfo createOrder(@RequestParam Long vehicleId, @RequestBody OrderInfo newOrder) {
+    @PostMapping("/createorder/{vehicleId}")
+    public @ResponseBody OrderInfo createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
         sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
         return newOrder;
     }
@@ -54,20 +58,39 @@ public class SellerController {
         orderRepository.deleteById(id);  //Do vehicle properties need to be changed?
     }
 
-    @PutMapping("/modifyorder/{id}")
-    public @ResponseBody OrderInfo modifyOrder(@PathVariable Long idOrderToModify, @RequestBody OrderInfo newOrder){
-        return sellerService.modifyOrder(idOrderToModify, newOrder);
+    @PutMapping("/modifyorder/{idOrderToModify}")
+    public @ResponseBody OrderInfo modifyOrder(@PathVariable Long idOrderToModify, @RequestBody OrderInfo modifiedOrder){
+        return sellerService.modifyOrder(idOrderToModify, modifiedOrder);
     }
 
-    @GetMapping("/orderstatus/{id}")
+    @GetMapping("/orderstatus/{orderId}")
     public @ResponseBody OrderStatus getOrderStatus(@PathVariable Long orderId){
         return sellerService.getOrderStatus(orderId);
     }
 
-    @PutMapping("/updateorderstatus/{orderId}{newStatus}")
+    @PatchMapping("/updateorderstatus/{orderId}/{newStatus}")
     public OrderInfo updateOrderStatus(@PathVariable Long orderId, @PathVariable OrderStatus newStatus){
         return sellerService.updateOrderStatus(orderId, newStatus);
     }
+
+    //TODO Verificare tutti gli ordini filtrati per uno stato
+
+    @PostMapping("/createrentorder")
+    public RentInfo createRentOrder(@RequestBody RentInfo newRentOrder){
+        return rentService.createRent(newRentOrder);
+    }
+
+    @DeleteMapping("/deleterentorder/{rentId}")
+    public void deleteRentOrder(@PathVariable Long rentId){
+        rentService.deleteRent(rentId);
+    }
+
+    @PutMapping("/modifyrentorder/{orderId}")
+    public RentInfo modifyRentOrder(@PathVariable Long orderId, @RequestBody RentInfo updatedRentOrder){
+        return rentService.updateRent(orderId, updatedRentOrder);
+    }
+
+
 
 
 

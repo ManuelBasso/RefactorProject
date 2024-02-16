@@ -25,8 +25,8 @@ public class SellerService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
-    public Vehicle getOneVehicleById(Long id){
-        return vehicleRepository.getById(id);
+    public Optional<Vehicle> getOneVehicleById(Long id){
+        return vehicleRepository.findById(id);
     }
 
     public OrderInfo getOneOrderById(Long id){
@@ -34,8 +34,8 @@ public class SellerService {
     }
 
     public void createOrderOfAvailableVehicle(Long vehicleId, OrderInfo newOrder){
-        Vehicle vehicleToOrder = vehicleRepository.getById(vehicleId);
-        if (vehicleToOrder != null && vehicleToOrder.getIsAvailable() == VehicleStatus.ORDERABLE) {
+        Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
+        if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
             orderRepository.save(newOrder);
         }
     }

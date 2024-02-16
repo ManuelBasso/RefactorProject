@@ -5,5 +5,8 @@ spring:
     password: admin
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: 'true'
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
