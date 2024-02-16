@@ -30,10 +30,9 @@ public class Vehicle {
     private Double price;               // Prezzo
     private Double discount;            // Eventuale sconto sul prezzo di listino
 
-    private Boolean isNew;
+    private Boolean isNew;              // Flag che identifica se il veicolo è nuovo o usato
 
-    // Flag che identifica se il veicolo è nuovo o usato
-    private VehicleStatus isAvailable;// Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
+    private VehicleStatus isAvailable;  // Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
 
 }
 

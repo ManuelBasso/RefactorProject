@@ -12,12 +12,17 @@ public class OrderInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private Long vehicleId;             //ID del veicolo
-    private Double advancePayment;      //Anticipo
-    private Boolean paidInFull;         //Flag pagato
-    //private Boolean orderStatus;        //Stato ordine
-    //private Boolean vehicleStatus;      //Veicolo ordinato/acquistato [noleggiato????]
-    private Enum<VehicleStatus> vehicleStatus;
-    private Enum<OrderStatus> orderStatus;
+
+    private Long vehicleId;                      //ID del veicolo da ordinare
+
+    private Double advancePayment;               //Anticipo
+
+    private Boolean paidInFull;                  //Flag pagato
+
+    @Enumerated(EnumType.STRING)
+    private VehicleStatus vehicleStatus;         //Veicolo ordinato/acquistato/noleggiato
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;             //Stato ordine
 
 }

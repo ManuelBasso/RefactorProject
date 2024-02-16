@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.ToDoubleBiFunction;
+
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -34,26 +36,45 @@ public class SellerController {
     @Autowired
     private SellerService sellerService;
 
+    //TODO Control null cases, wrong inputs etc...
+
     @GetMapping("/vehicleinfo/{id}")
     public @ResponseBody Vehicle getOneVehicle(@PathVariable Long id) {
-        Optional<Vehicle> vehicle = vehicleRepository.findById(id);
-        if (vehicle.isPresent()) {
-            return vehicle.get();
-        } else {
-            return null;
-        }
+        return sellerService.getOneVehicleById(id);
     }
 
-    @PostMapping("/createorder") //Is @ReqBody for Vehicle actually needed?
-    public @ResponseBody OrderInfo createOrder(@RequestParam Long vehicleId, @RequestBody OrderInfo order, @RequestBody Vehicle vehicle) {
-
-        if (vehicleId == vehicle.getId() && vehicle.getIsAvailable() == VehicleStatus.ORDERABLE) {
-            return orderRepository.save(order);
-        }
-        return null;
+    @PostMapping("/createorder")
+    public @ResponseBody OrderInfo createOrder(@RequestParam Long vehicleId, @RequestBody OrderInfo newOrder) {
+        sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
+        return newOrder;
     }
 
-    @GetMapping("/order/{id}")
+    @DeleteMapping("/deleteorder/{id}")
+    public void deleteOrder(@PathVariable Long id) {
+        orderRepository.deleteById(id);  //Do vehicle properties need to be changed?
+    }
+
+    @PutMapping("/modifyorder/{id}")
+    public @ResponseBody OrderInfo modifyOrder(@PathVariable Long idOrderToModify, @RequestBody OrderInfo newOrder){
+        return sellerService.modifyOrder(idOrderToModify, newOrder);
+    }
+
+    @GetMapping("/orderstatus/{id}")
+    public @ResponseBody OrderStatus getOrderStatus(@PathVariable Long orderId){
+        return sellerService.getOrderStatus(orderId);
+    }
+
+    @PutMapping("/updateorderstatus/{orderId}{newStatus}")
+    public OrderInfo updateOrderStatus(@PathVariable Long orderId, @PathVariable OrderStatus newStatus){
+        return sellerService.updateOrderStatus(orderId, newStatus);
+    }
+
+
+
+
+
+
+    /*@GetMapping("/order/{id}")
     public @ResponseBody OrderInfo getOneOrder(@PathVariable Long id) {
         Optional<OrderInfo> order = orderRepository.findById(id);
         if (order.isPresent()) {
@@ -61,29 +82,12 @@ public class SellerController {
         } else {
             return null;
         }
-    }
+    }*/
 
-    @PutMapping("/order/{id}")
-    public @ResponseBody OrderInfo updateOrder(@PathVariable Long id, @RequestBody OrderInfo order){
-        order.setId(id);
-        return orderRepository.save(order);
-    }
-
-    @DeleteMapping("/order/{id}")
-    public void deleteOrder(@PathVariable Long id) {
-        orderRepository.deleteById(id);  //Do vehicle properties need to be changed?
-    }
-
-    @GetMapping("/orderstatus/{id}")
-    public @ResponseBody Enum<OrderStatus> getOrderStatus(@PathVariable Long id){
-        OrderInfo order = getOneOrder(id);
-        return order.getOrderStatus();
-    }
-
-    @PutMapping("/orderstatus/{id}")     //???????? check enum? service? orderstatus
+    /*@PutMapping("/orderstatus/{id}")     //???????? check enum? service? orderstatus
     public OrderInfo updateOrderStatus(@PathVariable Long id, @RequestParam Enum<OrderStatus> newOrderStatus){
         return sellerService.setOrderStatusToDelivered(id, newOrderStatus);
-    }
+    }*/
 
     /*@GetMapping("/order/get{orderstatus}") //loop?? id?? getAll ; need to use sql queries to loop orderRepository
     public @ResponseBody List<OrderInfo> getAllOrdersByOrderStatus(@PathVariable String orderstatus) {
