@@ -1,9 +1,20 @@
 package com.develhope.spring.entities.vehicleTypes;
 
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@Entity
+@Table
+@NoArgsConstructor
+@AllArgsConstructor
 public class Vehicle {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private long id;
 
     private String brand;               // Marca
     private String model;               // Modello
@@ -20,7 +31,8 @@ public class Vehicle {
     private Double discount;            // Eventuale sconto sul prezzo di listino
 
     private Boolean isNew;              // Flag che identifica se il veicolo è nuovo o usato
-    private Boolean isAvailable;        // Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
+
+    private VehicleStatus isAvailable;  // Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
 
 }
 
