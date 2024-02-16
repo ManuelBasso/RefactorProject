@@ -13,14 +13,14 @@ public class OrderInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long vehicleId;                      //ID del veicolo da ordinare
+    //private Long vehicleId;                      //ID del veicolo da ordinare
 
     private Double advancePayment;               //Anticipo
 
     private Boolean paidInFull;                  //Flag pagato
 
     @Enumerated(EnumType.STRING)
-    private VehicleStatus vehicleStatus;         //Veicolo ordinato/acquistato/noleggiato
+    private VehicleOrderStatus vehicleOrderStatus;         //Veicolo ordinato/acquistato
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;             //Stato ordine

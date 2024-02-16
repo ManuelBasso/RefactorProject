@@ -37,7 +37,7 @@ public class RentService {
             updatedRent.setEndDate(rentDetails.getEndDate());
             updatedRent.setDailyCost(rentDetails.getDailyCost());
             updatedRent.setTotalCost(rentDetails.getTotalCost());
-            updatedRent.setPaid(rentDetails.isPaid());
+            updatedRent.setIsPaid(rentDetails.getIsPaid());
             return rentRepository.save(updatedRent);
         }else{
             //Noleggio non presente
