@@ -18,7 +18,7 @@ import java.time.OffsetDateTime;
 public class RentInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long rentId;
 
   //  @ManyToOne
     //@JoinColumn(name = "vehicle_id")

@@ -9,6 +9,8 @@ import com.develhope.spring.repositories.OrderRepository;
 import com.develhope.spring.repositories.VehicleRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,10 +35,25 @@ public class SellerService {
         return orderRepository.getById(id);
     }
 
-    public void createOrderOfAvailableVehicle(Long vehicleId, OrderInfo newOrder){
-        Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
-        if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
-            orderRepository.save(newOrder);
+    public ResponseEntity<String> createOrderOfAvailableVehicle(Long vehicleId, OrderInfo order){
+        try {
+            Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
+            if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
+                OrderInfo newOrder = new OrderInfo();
+                newOrder.setAdvancePayment(order.getAdvancePayment());
+                newOrder.setPaidInFull(order.getPaidInFull());
+                newOrder.setOrderStatus(order.getOrderStatus());
+                vehicleToOrder.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
+                orderRepository.save(newOrder);
+                return ResponseEntity.ok("Order placed successfully");
+            } else if (vehicleToOrder.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
+                return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not available");
+            } else if (!vehicleToOrder.isPresent()) {
+                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with ID:" + vehicleId);
+            }
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went in function body");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong");
         }
     }
 

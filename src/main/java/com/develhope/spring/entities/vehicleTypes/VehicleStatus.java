@@ -2,7 +2,7 @@ package com.develhope.spring.entities.vehicleTypes;
 
 public enum VehicleStatus {
     AVAILABLE,          //Disponibile, quindi acquistabile
-    NOTAVAILABLE,       //Non disponibile
+    NOT_AVAILABLE,       //Non disponibile
     ORDERABLE,          //Ordinabile
     REANTABLE           //Affittabile
 

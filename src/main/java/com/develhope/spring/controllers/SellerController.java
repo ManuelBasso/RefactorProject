@@ -11,6 +11,7 @@ import com.develhope.spring.services.RentService;
 import com.develhope.spring.services.SellerService;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -48,9 +49,8 @@ public class SellerController {
     }
 
     @PostMapping("/createorder/{vehicleId}")
-    public @ResponseBody OrderInfo createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
-        sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
-        return newOrder;
+    public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
+        return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
     }
 
     @DeleteMapping("/deleteorder/{id}")

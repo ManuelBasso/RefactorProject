@@ -1,5 +1,6 @@
 package com.develhope.spring.entities.vehicleTypes;
 
+import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -7,14 +8,17 @@ import lombok.NoArgsConstructor;
 
 @Data
 @Entity
-@Table
+@Table(name = "Vehicles")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long vehicleId;
+
+    /*@OneToOne(mappedBy = "newVehicle")
+    private OrderInfo orderInfo;*/
 
     private String brand;               // Marca
     private String model;               // Modello
