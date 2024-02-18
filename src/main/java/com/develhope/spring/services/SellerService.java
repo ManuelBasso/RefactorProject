@@ -1,12 +1,13 @@
 package com.develhope.spring.services;
 
 import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
-import com.develhope.spring.entities.StatusOfVehicle.OrderStatus;
 import com.develhope.spring.entities.StatusOfVehicle.RentInfo;
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
-import com.develhope.spring.entities.vehicleTypes.VehicleStatus;
 import com.develhope.spring.repositories.OrderRepository;
 import com.develhope.spring.repositories.VehicleRepository;
+import com.develhope.spring.utilities.OrderStatus;
+import com.develhope.spring.utilities.VehicleStatus;
+
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.develhope.spring.entities.vehicleTypes;
+package com.develhope.spring.utilities;
 
 public enum VehicleStatus {
     AVAILABLE,          //Disponibile, quindi acquistabile

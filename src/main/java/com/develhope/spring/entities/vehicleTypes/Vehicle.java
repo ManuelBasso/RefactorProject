@@ -1,5 +1,7 @@
 package com.develhope.spring.entities.vehicleTypes;
 
+import com.develhope.spring.utilities.VehicleStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
