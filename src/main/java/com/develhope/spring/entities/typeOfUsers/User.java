@@ -1,5 +1,9 @@
 package com.develhope.spring.entities.typeOfUsers;
 
+import java.util.List;
+
+import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
+import com.develhope.spring.entities.StatusOfVehicle.RentInfo;
 import com.develhope.spring.utilities.Role;
 
 import jakarta.persistence.*;
@@ -12,7 +16,7 @@ import lombok.*;
 @NoArgsConstructor
 public class User {
 
-    @Id
+    @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
@@ -27,6 +31,12 @@ public class User {
 
     @Column(nullable = false)
     private String password;
+
+    @OneToMany(mappedBy = "user")
+    private List<OrderInfo> order;
+
+    @OneToMany(mappedBy = "user")
+    private List<RentInfo> rent;
 
     @Enumerated(EnumType.STRING)
     private Role role;

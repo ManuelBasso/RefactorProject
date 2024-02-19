@@ -1,8 +1,9 @@
 package com.develhope.spring.entities.StatusOfVehicle;
 
+import com.develhope.spring.entities.typeOfUsers.User;
+import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import com.develhope.spring.utilities.OrderStatus;
 import com.develhope.spring.utilities.VehicleOrderStatus;
-import com.develhope.spring.utilities.VehicleStatus;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -21,6 +22,14 @@ public class OrderInfo {
     private Double advancePayment; // Anticipo
 
     private Boolean paidInFull; // Flag pagato
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 
     @Enumerated(EnumType.STRING)
     private VehicleOrderStatus vehicleOrderStatus; // Veicolo ordinato/acquistato
