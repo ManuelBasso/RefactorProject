@@ -90,7 +90,10 @@ public class SellerController {
         return rentService.updateRent(orderId, updatedRentOrder);
     }
 
-
+    /*@GetMapping("/getordersbystatus")
+    public List<OrderInfo> getOrdersByStatus(@RequestParam (required = true) String status) {
+        return sellerService.getAllOrdersByStatusParams(status);
+    }*/
 
 
 

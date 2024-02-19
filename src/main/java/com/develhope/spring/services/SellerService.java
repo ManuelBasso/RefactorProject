@@ -48,12 +48,12 @@ public class SellerService {
                 return ResponseEntity.ok("Order placed successfully");
             } else if (vehicleToOrder.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
                 return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not available");
-            } else if (!vehicleToOrder.isPresent()) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with ID:" + vehicleId);
+            } else if (vehicleToOrder.isEmpty()) {
+                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with that ID");
             }
-            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went in function body");
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong in the function body");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong");
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong. Exception launched.");
         }
     }
 
@@ -80,6 +80,7 @@ public class SellerService {
         }
         return orderToUpdateStatus;
     }
+
 
     /*public OrderInfo setOrderStatusToDelivered(Long orderId, Enum<OrderStatus> newOrderStatus){
         OrderInfo order = orderRepository.getById(orderId);

@@ -18,9 +18,9 @@ public class OrderInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    /*@OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "vehicle_id")
-    private Vehicle newVehicle;*/
+    private Vehicle newVehicle;
     //private Long vehicleId;                      //ID del veicolo da ordinare
 
     private Double advancePayment;               //Anticipo

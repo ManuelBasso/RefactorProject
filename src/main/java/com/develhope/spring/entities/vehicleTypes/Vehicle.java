@@ -17,8 +17,8 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehicleId;
 
-    /*@OneToOne(mappedBy = "newVehicle")
-    private OrderInfo orderInfo;*/
+    @OneToOne(mappedBy = "newVehicle")
+    private OrderInfo orderInfo;
 
     private String brand;               // Marca
     private String model;               // Modello
