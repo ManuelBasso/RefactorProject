@@ -1,4 +1,4 @@
-package com.develhope.spring.entities.StatusOfVehicle;
+package com.develhope.spring.utilities;
 
 public enum OrderStatus {
     INCOMPLETE,

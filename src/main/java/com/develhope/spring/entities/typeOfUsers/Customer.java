@@ -1,6 +1,6 @@
 package com.develhope.spring.entities.typeOfUsers;
 
-import com.develhope.spring.configurations.Role;
+import com.develhope.spring.utilities.Role;
 
 import jakarta.persistence.*;
 import lombok.*;

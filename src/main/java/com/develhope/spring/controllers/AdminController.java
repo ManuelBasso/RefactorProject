@@ -3,53 +3,50 @@ package com.develhope.spring.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
-import com.develhope.spring.repositories.VehicleRepository;
+import com.develhope.spring.services.AdminServices;
+import com.develhope.spring.utilities.VehicleStatus;
 
 import org.springframework.web.bind.annotation.RequestMapping;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
     @Autowired
-    private VehicleRepository vehicleRepository;
+    private AdminServices adminServices;
 
     // creazione nuovo veicolo
     @PostMapping("/addVehicle")
     public Vehicle addAVehicle(@RequestBody Vehicle vehicle) {
-
-        Vehicle newVehicle = vehicleRepository.save(vehicle);
-        return newVehicle;
+        return adminServices.addVehicle(vehicle);
     }
 
-    // cambio di stato da nuovo a usato
-    @PatchMapping("/updateStatusOfvehiclebyid/{id}")
-    public Vehicle updateCar(@PathVariable Long id, @RequestBody Vehicle vehicle) {
-        @SuppressWarnings("null")
-        Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
-        Vehicle updatedVehicle = new Vehicle();
-        if (optionalVehicle.isPresent()) {
-            updatedVehicle = optionalVehicle.get();
-            updatedVehicle.setIsNew(vehicle.getIsNew());
-        }
-        return vehicleRepository.save(updatedVehicle);
+    // modifica dei parametri di un veicolo
+    @PutMapping("/{id}/modifyAVehicle")
+    public Vehicle modifVehicleById(@PathVariable Long id, @RequestParam String choice, @RequestBody Vehicle vehicle) {
+        return adminServices.modifyVehicle(id, choice, vehicle);
     }
 
     // eliminazione veicolo tramite id
-   
-    @DeleteMapping("/deleteVehicleById/{id}")
-    public void deleteVehicle(@PathVariable Long id) {
-        if (vehicleRepository.existsById(id)) {
-            vehicleRepository.deleteById(id);
-        }
 
+    @DeleteMapping("/{id}/deleteVehicleById")
+    public boolean deleteVehicleById(@PathVariable Long id) {
+        return adminServices.deleteVehicle(id);
+    }
+
+    // cambio dello stato di un veicolo
+    @PatchMapping("/{id}/changeStatusOfAVehicle")
+    public Vehicle changeStatusOfAVehicle(@PathVariable Long id, @RequestParam VehicleStatus status) {
+        return adminServices.changeStatusVehicle(id, status);
     }
 
 }
