@@ -1,5 +1,6 @@
 package com.develhope.spring.entities.StatusOfVehicle;
 
+import com.develhope.spring.entities.typeOfUsers.User;
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,10 @@ public class RentInfo {
             joinColumns=@JoinColumn(name="RENT_ID", referencedColumnName="rentId"),
             inverseJoinColumns=@JoinColumn(name="VEHICLE_ID", referencedColumnName="vehicleId"))
     private List<Vehicle> vehicles;
+
+    @ManyToOne
+    @JoinColumn(name = "users_id")
+    private User user;
 
 
     //TODO totalCost should be calculated by the program, not the user
