@@ -1,10 +1,14 @@
 package com.develhope.spring.entities.vehicleTypes;
 
 import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
+import com.develhope.spring.entities.StatusOfVehicle.RentInfo;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import javax.print.attribute.standard.MediaSize;
+import java.util.List;
 
 @Data
 @Entity
@@ -17,8 +21,8 @@ public class Vehicle {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long vehicleId;
 
-    @OneToOne(mappedBy = "newVehicle")
-    private OrderInfo orderInfo;
+    /*@OneToOne(mappedBy = "newVehicle")
+    private OrderInfo orderInfo;*/
 
     private String brand;               // Marca
     private String model;               // Modello
@@ -38,6 +42,12 @@ public class Vehicle {
 
     @Enumerated(EnumType.STRING)
     private VehicleStatus isAvailable;  // Flag che identifica se il veicolo è ordinabile, acquistabile o non più disponibile
+
+    /*@OneToMany(mappedBy = "rentedVehicle")
+    private List<RentInfo> rentInfos;
+
+    @OneToMany(mappedBy = "orderedVehicle")
+    private List<OrderInfo> orderInfos;*/
 
 }
 

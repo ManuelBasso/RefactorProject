@@ -5,16 +5,16 @@ import com.develhope.spring.configurations.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
-@Table
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
     private String firstName;
@@ -30,4 +30,5 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
 }

@@ -10,9 +10,11 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 
 @Entity
 @Data
+@Table(name = "Rents")
 @AllArgsConstructor
 @NoArgsConstructor
 public class RentInfo {
@@ -29,6 +31,18 @@ public class RentInfo {
     private Double dailyCost;    // Costo giornaliero noleggio
     private Double totalCost;   // Costo totale noleggio
     private Boolean isPaid;      // Flag pagato
+
+    /*@ManyToOne(fetch=FetchType.LAZY)
+    @JoinColumn(name="RENTED_VEHICLE_ID")
+    private Vehicle rentedVehicle;*/
+
+    @ManyToMany
+    @JoinTable(
+            name="RENT_VEHICLE",
+            joinColumns=@JoinColumn(name="RENT_ID", referencedColumnName="rentId"),
+            inverseJoinColumns=@JoinColumn(name="VEHICLE_ID", referencedColumnName="vehicleId"))
+    private List<Vehicle> vehicles;
+
 
     //TODO totalCost should be calculated by the program, not the user
 
