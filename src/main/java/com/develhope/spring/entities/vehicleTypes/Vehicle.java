@@ -1,9 +1,8 @@
 package com.develhope.spring.entities.vehicleTypes;
 
-import java.util.List;
-
 import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
 import com.develhope.spring.entities.StatusOfVehicle.RentInfo;
+import java.util.List;
 import com.develhope.spring.entities.typeOfUsers.Admin;
 import com.develhope.spring.entities.typeOfUsers.Seller;
 import com.develhope.spring.utilities.VehicleStatus;
@@ -13,16 +12,22 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.print.attribute.standard.MediaSize;
+import java.util.List;
+
 @Data
 @Entity
-@Table
+@Table(name = "Vehicles")
 @NoArgsConstructor
 @AllArgsConstructor
 public class Vehicle {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long vehicleId;
+
+    /*@OneToOne(mappedBy = "newVehicle")
+    private OrderInfo orderInfo;*/
 
     private String brand; // Marca
     private String model; // Modello
@@ -40,22 +45,15 @@ public class Vehicle {
 
     private Boolean isNew; // Flag che identifica se il veicolo è nuovo o usato
 
-    @OneToMany(mappedBy = "vehicle")
-    private List<OrderInfo> order;
-
-    @OneToMany(mappedBy = "vehicle")
-    private List<RentInfo> rents;
-
-    @ManyToMany(mappedBy = "vehicle")
-    private List<Admin> admins;
-
-    @ManyToMany(mappedBy = "vehicle")
-    private List<Seller> sellers;
-
     @Enumerated(EnumType.STRING)
     private VehicleStatus isAvailable; // Flag che identifica se il veicolo è ordinabile, acquistabile o non più
                                        // disponibile
 
+    /*@OneToMany(mappedBy = "rentedVehicle")
+    private List<RentInfo> rentInfos;
+
+    @OneToMany(mappedBy = "orderedVehicle")
+    private List<OrderInfo> orderInfos;*/
 }
 
 /*

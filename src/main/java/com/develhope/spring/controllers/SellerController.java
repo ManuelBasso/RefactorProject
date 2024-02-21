@@ -12,6 +12,7 @@ import com.develhope.spring.utilities.VehicleStatus;
 
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -49,9 +50,8 @@ public class SellerController {
     }
 
     @PostMapping("/createorder/{vehicleId}")
-    public @ResponseBody OrderInfo createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
-        sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
-        return newOrder;
+    public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
+        return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
     }
 
     @DeleteMapping("/deleteorder/{id}")
@@ -91,7 +91,10 @@ public class SellerController {
         return rentService.updateRent(orderId, updatedRentOrder);
     }
 
-
+    /*@GetMapping("/getordersbystatus")
+    public List<OrderInfo> getOrdersByStatus(@RequestParam (required = true) String status) {
+        return sellerService.getAllOrdersByStatusParams(status);
+    }*/
 
 
 

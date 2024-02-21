@@ -5,13 +5,15 @@ import java.util.List;
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import com.develhope.spring.utilities.Role;
 
+import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
+import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
-@Data
-@Table
+import java.util.List;
 
+@Entity
+@Table(name = "Admins")
 public class Admin extends User {
 
     private Role role = Role.ROLE_ADMIN;
@@ -19,5 +21,4 @@ public class Admin extends User {
     @ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "administrator_vehicle", joinColumns = @JoinColumn(name = "administrator_id"), inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
     private List<Vehicle> vehicle;
-
 }

@@ -9,16 +9,18 @@ import com.develhope.spring.utilities.Role;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Data
-@Table
+import java.util.List;
+
 @Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(nullable = false)
     private String firstName;
@@ -40,4 +42,5 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     private Role role;
+
 }

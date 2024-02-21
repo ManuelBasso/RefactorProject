@@ -3,38 +3,41 @@ package com.develhope.spring.entities.StatusOfVehicle;
 import com.develhope.spring.entities.typeOfUsers.User;
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import com.develhope.spring.utilities.OrderStatus;
-import com.develhope.spring.utilities.VehicleOrderStatus;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
-@Table
+@Table(name = "Orders")
+@AllArgsConstructor
+@NoArgsConstructor
 public class OrderInfo {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long orderId;
 
-    // private Long vehicleId; //ID del veicolo da ordinare
+    @ManyToMany
+    @JoinTable(
+            name="ORDER_VEHICLE",
+            joinColumns=@JoinColumn(name="ORDER_ID", referencedColumnName="orderId"),
+            inverseJoinColumns=@JoinColumn(name="VEHICLE_ID", referencedColumnName="vehicleId"))
+    private List<Vehicle> vehicles;
 
-    private Double advancePayment; // Anticipo
+    private Double advancePayment;               //Anticipo
 
-    private Boolean paidInFull; // Flag pagato
-
-    @ManyToOne
-    @JoinColumn(name = "vehicle_id")
-    private Vehicle vehicle;
+    private Boolean paidInFull;                  //Flag pagato
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
     @Enumerated(EnumType.STRING)
-    private VehicleOrderStatus vehicleOrderStatus; // Veicolo ordinato/acquistato
-
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus; // Stato ordine
+    private OrderStatus orderStatus;             //Stato ordine
 
 }
