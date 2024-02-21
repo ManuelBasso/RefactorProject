@@ -7,9 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Duration;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 
@@ -23,19 +20,11 @@ public class RentInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rentId;
 
-  //  @ManyToOne
-    //@JoinColumn(name = "vehicle_id")
-    //private Vehicle vehicle;
-
     private OffsetDateTime startDate; // Data inizio noleggio
     private OffsetDateTime endDate;   // Data fine noleggio
     private Double dailyCost;    // Costo giornaliero noleggio
     private Double totalCost;   // Costo totale noleggio
     private Boolean isPaid;      // Flag pagato
-
-    /*@ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="RENTED_VEHICLE_ID")
-    private Vehicle rentedVehicle;*/
 
     @ManyToMany
     @JoinTable(
