@@ -2,6 +2,7 @@ package com.develhope.spring.entities.vehicleTypes;
 
 import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
 import com.develhope.spring.entities.StatusOfVehicle.RentInfo;
+import com.develhope.spring.entities.typeOfUsers.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,7 +49,6 @@ public class Vehicle {
 
     @OneToMany(mappedBy = "orderedVehicle")
     private List<OrderInfo> orderInfos;*/
-
 }
 
 /*
