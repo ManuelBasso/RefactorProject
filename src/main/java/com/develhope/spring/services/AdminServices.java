@@ -9,7 +9,8 @@ import com.develhope.spring.entities.vehicleTypes.Vehicle;
 import com.develhope.spring.repositories.AdminRepository;
 import com.develhope.spring.repositories.UserRepository;
 import com.develhope.spring.repositories.VehicleRepository;
-import com.develhope.spring.entities.vehicleTypes.VehicleStatus;
+import com.develhope.spring.utilities.VehicleStatus;
+
 
 @Service
 public class AdminServices {

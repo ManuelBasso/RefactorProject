@@ -1,7 +1,7 @@
 package com.develhope.spring.repositories;
 
 import com.develhope.spring.entities.StatusOfVehicle.OrderInfo;
-import com.develhope.spring.entities.StatusOfVehicle.OrderStatus;
+import com.develhope.spring.utilities.OrderStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

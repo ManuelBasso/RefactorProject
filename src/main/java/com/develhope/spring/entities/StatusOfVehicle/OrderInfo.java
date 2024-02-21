@@ -2,6 +2,8 @@ package com.develhope.spring.entities.StatusOfVehicle;
 
 import com.develhope.spring.entities.typeOfUsers.User;
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
+import com.develhope.spring.utilities.OrderStatus;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
