@@ -1,5 +1,6 @@
 package com.develhope.spring.controllers;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.develhope.spring.entities.vehicleTypes.Vehicle;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 
+@Tag(name = "Admin options", description = "Here are all functions needed for our admins")
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
