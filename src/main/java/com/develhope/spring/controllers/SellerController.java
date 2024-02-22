@@ -10,6 +10,10 @@ import com.develhope.spring.services.SellerService;
 import com.develhope.spring.utilities.OrderStatus;
 import com.develhope.spring.utilities.VehicleStatus;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,7 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 
-
+@Tag(name = "Seller options", description = "Here are all functions needed for our sellers")
 @RestController
 @RequestMapping("/seller")
 public class SellerController {
@@ -44,31 +48,73 @@ public class SellerController {
 
     //TODO Control null cases, wrong inputs etc...
 
-    @GetMapping("/vehicleinfo/{id}")
-    public Optional<Vehicle> getOneVehicle(@PathVariable Long id) {
-        return sellerService.getOneVehicleById(id);
+    @Operation(summary = "Retrieve a vehicle by ID.",
+            description = "Get a Vehicle object by specifying its ID.",
+            tags = {"seller", "get", "vehicle"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Request completed"),
+            @ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
+            @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
+    @GetMapping("/vehicleinfo/{vehicleId}")
+    public Optional<Vehicle> getOneVehicle(@PathVariable Long vehicleId) {
+        return sellerService.getOneVehicleById(vehicleId);
     }
 
+    @Operation(summary = "Create order.",
+            description = "Create an order for a vehicle, if it is available, by specifying order details and vehicle ID",
+            tags = {"seller", "create", "order"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order created"),
+            @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
+            @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
     @PostMapping("/createorder/{vehicleId}")
     public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
         return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
     }
 
+    @Operation(summary = "Delete order.",
+            description = "Delete an order by specifying its ID",
+            tags = {"seller", "delete", "order"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order deleted"),
+            @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
+            @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
     @DeleteMapping("/deleteorder/{id}")
     public void deleteOrder(@PathVariable Long id) {
         orderRepository.deleteById(id);  //Do vehicle properties need to be changed?
     }
 
+    @Operation(summary = "Modify order.",
+            description = "Modify an order by specifying its ID and updated order details",
+            tags = {"seller", "modify", "order"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order modified"),
+            @ApiResponse(responseCode = "400", description = "Invalid order ID or order details supplied"),
+            @ApiResponse(responseCode = "404", description = "No order with that ID") })
     @PutMapping("/modifyorder/{idOrderToModify}")
     public @ResponseBody OrderInfo modifyOrder(@PathVariable Long idOrderToModify, @RequestBody OrderInfo modifiedOrder){
         return sellerService.modifyOrder(idOrderToModify, modifiedOrder);
     }
 
+    @Operation(summary = "Get order status.",
+            description = "Get order status details by specifying its ID",
+            tags = {"seller", "get", "order"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Request completed"),
+            @ApiResponse(responseCode = "400", description = "Invalid order ID supplied"),
+            @ApiResponse(responseCode = "404", description = "No order with that ID") })
     @GetMapping("/orderstatus/{orderId}")
     public @ResponseBody OrderStatus getOrderStatus(@PathVariable Long orderId){
         return sellerService.getOrderStatus(orderId);
     }
 
+    @Operation(summary = "Update order status.",
+            description = "Update order status by specifying its ID and the updated order status",
+            tags = {"seller", "update", "order"})
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Request completed"),
+            @ApiResponse(responseCode = "400", description = "Invalid order ID or order status supplied"),
+            @ApiResponse(responseCode = "404", description = "No order with that ID or invalid order status") })
     @PatchMapping("/updateorderstatus/{orderId}/{newStatus}")
     public OrderInfo updateOrderStatus(@PathVariable Long orderId, @PathVariable OrderStatus newStatus){
         return sellerService.updateOrderStatus(orderId, newStatus);
