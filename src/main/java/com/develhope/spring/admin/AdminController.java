@@ -52,7 +52,7 @@ public class AdminController {
     }
 
     // creazione nuovo ordine per un utente specifico 
-    @PostMapping("/{id}/{id}/createOrderForAUser")
+    @PostMapping("/{userid}/{vehicleid}/createOrderForAUser")
     public OrderInfo creatOrderForUser(@PathVariable Long user_id,@PathVariable Long vehicle_Id,@RequestParam boolean advance) {
         return adminServices.createOrderForAUser(user_id,vehicle_Id,advance);
     }

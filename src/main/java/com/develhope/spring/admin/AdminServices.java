@@ -130,17 +130,14 @@ public class AdminServices {
 
     // creazione ordine per un utente tramite id
     public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance) throws OrderCreationException {
-
         Optional<User> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderCreationException("Invalid user or vehicle ID");
         }
-
         if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderCreationException("Vehicle is not available for order");
         }
-
         OrderInfo newOrder = new OrderInfo();
         newOrder.setVehicles((List<Vehicle>) vehicle.get());
         // se l'acquirente paga un anticipo si chiama il metodo getAdvancePaymentAmount
@@ -150,7 +147,6 @@ public class AdminServices {
         newOrder.setPaidInFull(false);
         newOrder.setUser(user.get());
         newOrder.setOrderStatus(OrderStatus.INCOMPLETE);
-
         try {
             orderRepository.save(newOrder);
             vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
