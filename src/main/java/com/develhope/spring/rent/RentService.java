@@ -31,8 +31,8 @@ public class RentService {
         Optional<RentInfo> rent = rentRepository.findById(id);
         if(rent.isPresent()){
             RentInfo updatedRent = rent.get();
-            updatedRent.setStartDate(rentDetails.getStartDate());
-            updatedRent.setEndDate(rentDetails.getEndDate());
+          //  updatedRent.setStartDate(rentDetails.getStartDate());
+          //  updatedRent.setEndDate(rentDetails.getEndDate());
             updatedRent.setDailyCost(rentDetails.getDailyCost());
             updatedRent.setTotalCost(rentDetails.getTotalCost());
             updatedRent.setIsPaid(rentDetails.getIsPaid());

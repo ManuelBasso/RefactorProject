@@ -58,6 +58,7 @@ public class SellerService {
         }
     }
 
+
     public OrderInfo modifyOrder(Long orderId, OrderInfo newOrder){
         OrderInfo orderToModify = orderRepository.getById(orderId);
         if(orderToModify != null){

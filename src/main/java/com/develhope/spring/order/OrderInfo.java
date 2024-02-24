@@ -21,16 +21,17 @@ public class OrderInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    @ManyToMany
-    @JoinTable(
-            name="ORDER_VEHICLE",
-            joinColumns=@JoinColumn(name="ORDER_ID", referencedColumnName="orderId"),
-            inverseJoinColumns=@JoinColumn(name="VEHICLE_ID", referencedColumnName="vehicleId"))
-    private List<Vehicle> vehicles;
-
     private Double advancePayment;               //Anticipo
 
     private Boolean paidInFull;                  //Flag pagato
+
+    @ManyToMany
+    @JoinTable(
+            name = "ORDER_VEHICLE",
+            joinColumns = @JoinColumn(name = "ORDER_ID", referencedColumnName = "orderId"),
+            inverseJoinColumns = @JoinColumn(name = "VEHICLE_ID", referencedColumnName = "vehicleId"))
+    private List<Vehicle> vehicles;
+
 
     @ManyToOne
     @JoinColumn(name = "user_id")

@@ -96,7 +96,7 @@ public class AdminServices {
 
                     break;
             }
-            return optionalVehicle.get();
+            return vehicleRepository.saveAndFlush(optionalVehicle.get());
         }
         return null;
     }
@@ -135,7 +135,7 @@ public class AdminServices {
         if (optionalVehicle.isPresent()) {
             Vehicle updatedVehicle = optionalVehicle.get();
             updatedVehicle.setIsAvailable(status);
-            return updatedVehicle;
+            return vehicleRepository.saveAndFlush(updatedVehicle);
         }
         return null;
     }

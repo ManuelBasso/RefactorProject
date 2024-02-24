@@ -46,7 +46,7 @@ public class SellerController {
     private RentService rentService;
 
     //TODO Control null cases, wrong inputs etc...
-
+    //tested: ok
     @Operation(summary = "Retrieve a vehicle by ID.",
             description = "Get a Vehicle object by specifying its ID.",
             tags = {"seller", "get", "vehicle"})
@@ -59,6 +59,7 @@ public class SellerController {
         return sellerService.getOneVehicleById(vehicleId);
     }
 
+    //tested: create order but without userId, should we pass idUser too????
     @Operation(summary = "Create order.",
             description = "Create an order for a vehicle, if it is available, by specifying order details and vehicle ID",
             tags = {"seller", "create", "order"})
@@ -71,6 +72,7 @@ public class SellerController {
         return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
     }
 
+    //tested: ok
     @Operation(summary = "Delete order.",
             description = "Delete an order by specifying its ID",
             tags = {"seller", "delete", "order"})
@@ -82,7 +84,7 @@ public class SellerController {
     public void deleteOrder(@PathVariable Long id) {
         orderRepository.deleteById(id);  //Do vehicle properties need to be changed?
     }
-
+    //tested: ok
     @Operation(summary = "Modify order.",
             description = "Modify an order by specifying its ID and updated order details",
             tags = {"seller", "modify", "order"})
@@ -95,6 +97,7 @@ public class SellerController {
         return sellerService.modifyOrder(idOrderToModify, modifiedOrder);
     }
 
+    //tested: ok
     @Operation(summary = "Get order status.",
             description = "Get order status details by specifying its ID",
             tags = {"seller", "get", "order"})
@@ -107,6 +110,7 @@ public class SellerController {
         return sellerService.getOrderStatus(orderId);
     }
 
+    //tested: ok
     @Operation(summary = "Update order status.",
             description = "Update order status by specifying its ID and the updated order status",
             tags = {"seller", "update", "order"})
