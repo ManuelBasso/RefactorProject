@@ -27,6 +27,7 @@ public class AdminController {
     private AdminServices adminServices;
 
     // creazione nuovo veicolo
+    //tested:ok
     @PostMapping("/addVehicle")
     public Vehicle addAVehicle(@RequestBody Vehicle vehicle) {
         return adminServices.addVehicle(vehicle);

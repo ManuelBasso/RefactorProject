@@ -17,12 +17,13 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RentInfo {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rentId;
-
-    private OffsetDateTime startDate; // Data inizio noleggio
-    private OffsetDateTime endDate;   // Data fine noleggio
+    //not able to create table using OffsetDateTime
+   // private OffsetDateTime startDate; // Data inizio noleggio
+   // private OffsetDateTime endDate;   // Data fine noleggio
     private Double dailyCost;    // Costo giornaliero noleggio
     private Double totalCost;   // Costo totale noleggio
     private Boolean isPaid;      // Flag pagato

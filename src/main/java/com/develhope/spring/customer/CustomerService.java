@@ -49,8 +49,8 @@ public class CustomerService {
 
     public List<OrderInfo> getOrders(long id) {
         List<OrderInfo> myorders = orderRepository.findByUserId(id);
-       return myorders;
-     }
+        return myorders;
+    }
 
     public boolean deleteOrder(long idOrder) {
         Optional<OrderInfo> orderToDelete = orderRepository.findById(idOrder);
@@ -73,15 +73,15 @@ public class CustomerService {
         }
     }
 
-    public Customer updateCustomer(long id, Customer customer) {
-        Optional<Customer> customerToUpdate = customerRepository.findById(id);
-        if (customerToUpdate.isPresent()) {
-            customerToUpdate.get().setFirstName(customer.getFirstName());
-            customerToUpdate.get().setLastName(customer.getLastName());
-            customerToUpdate.get().setEmail(customer.getEmail());
-            customerToUpdate.get().setPassword(customer.getPassword());
-            customerToUpdate.get().setPhoneNumber(customer.getPhoneNumber());
-            return customerToUpdate.get();
+    public User updateCustomer(long id, User user) {
+        Optional<User> userToUpdate = userRepository.findById(id);
+        if (userToUpdate.isPresent()) {
+            userToUpdate.get().setFirstName(user.getFirstName());
+            userToUpdate.get().setLastName(user.getLastName());
+            userToUpdate.get().setEmail(user.getEmail());
+            userToUpdate.get().setPassword(user.getPassword());
+            // userToUpdate.get().setPhoneNumber(user.getPhoneNumber());
+            return userToUpdate.get();
         } else {
             return null;
         }
