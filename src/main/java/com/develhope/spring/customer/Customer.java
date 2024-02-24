@@ -9,6 +9,8 @@ import lombok.*;
 @Entity
 @PrimaryKeyJoinColumn(name = "customerId")
 @Table(name = "Customers")
+@Getter
+@Setter
 public class Customer extends User {
 
     /*@Id

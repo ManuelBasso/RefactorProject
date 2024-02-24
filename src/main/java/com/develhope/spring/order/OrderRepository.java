@@ -11,6 +11,9 @@ public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
 
     List<OrderInfo> findByOrderStatus(OrderStatus status);
 
+    //Da testare
+     List<OrderInfo> findByUserId(long id);
+
     /*@Query(value = "SELECT ORDERSTATUS FROM ORDERS o WHERE o. ")
     List<OrderInfo> getOrdersByStatus(OrderStatus status);*/
 }

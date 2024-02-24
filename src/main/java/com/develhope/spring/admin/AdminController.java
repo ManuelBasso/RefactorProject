@@ -27,31 +27,35 @@ public class AdminController {
     private AdminServices adminServices;
 
     // creazione nuovo veicolo
+    //tested:ok
     @PostMapping("/addVehicle")
     public Vehicle addAVehicle(@RequestBody Vehicle vehicle) {
         return adminServices.addVehicle(vehicle);
     }
 
     // modifica dei parametri di un veicolo
+    //tested: ok but added saveAndFlush in service to update db
     @PutMapping("/{id}/modifyAVehicle")
     public Vehicle modifVehicleById(@PathVariable Long id, @RequestParam String choice, @RequestBody Vehicle vehicle) {
         return adminServices.modifyVehicle(id, choice, vehicle);
     }
 
     // eliminazione veicolo tramite id
-
+    //tested: ok
     @DeleteMapping("/{id}/deleteVehicleById")
     public boolean deleteVehicleById(@PathVariable Long id) {
         return adminServices.deleteVehicle(id);
     }
 
     // cambio dello stato di un veicolo
+    //tested: ok but added saveAndFlush in service to update db
     @PatchMapping("/{id}/changeStatusOfAVehicle")
     public Vehicle changeStatusOfAVehicle(@PathVariable Long id, @RequestParam VehicleStatus status) {
         return adminServices.changeStatusVehicle(id, status);
     }
 
-    // creazione nuovo ordine per un utente specifico 
+    // creazione nuovo ordine per un utente specifico
+    //tested: I tried and I fail :)
     @PostMapping("/{userid}/{vehicleid}/createOrderForAUser")
     public OrderInfo creatOrderForUser(@PathVariable Long user_id,@PathVariable Long vehicle_Id,@RequestParam boolean advance) {
         return adminServices.createOrderForAUser(user_id,vehicle_Id,advance);
