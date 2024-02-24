@@ -8,6 +8,8 @@ import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
 
+import com.develhope.spring.user.User;
+import com.develhope.spring.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,9 +31,12 @@ public class CustomerService {
     @Autowired
     RentRepository rentRepository;
 
+    @Autowired
+    UserRepository userRepository;
 
-    public Customer createCustomer(Customer customer) {
-        return customerRepository.saveAndFlush(customer);
+
+    public User createCustomer(User user) {
+        return userRepository.saveAndFlush(user);
     }
 
     public Vehicle getVehicle(long idVehicle) {

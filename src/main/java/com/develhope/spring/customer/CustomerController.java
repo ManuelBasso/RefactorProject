@@ -1,6 +1,7 @@
 package com.develhope.spring.customer;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.user.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -16,9 +17,9 @@ public class CustomerController {
     CustomerService customerService;
 
 
-    @PostMapping("/create")
-    public Customer createCustomer(@RequestBody Customer customer) {
-        return customerService.createCustomer(customer);
+    @PostMapping("/createUser")
+    public User createCustomer(@RequestBody User user) {
+        return customerService.createCustomer(user);
     }
 
     //Ottenere i dettagli di un veicolo specifico
