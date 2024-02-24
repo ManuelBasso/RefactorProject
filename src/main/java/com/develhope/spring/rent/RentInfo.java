@@ -1,6 +1,8 @@
 package com.develhope.spring.rent;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.customer.Customer;
+import com.develhope.spring.seller.Seller;
 import com.develhope.spring.user.User;
 
 import jakarta.persistence.*;
@@ -21,14 +23,27 @@ public class RentInfo {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long rentId;
+    //TODO review this
     //not able to create table using OffsetDateTime
-   // private OffsetDateTime startDate; // Data inizio noleggio
-   // private OffsetDateTime endDate;   // Data fine noleggio
+    private OffsetDateTime startDate; // Data inizio noleggio
+    private OffsetDateTime endDate;   // Data fine noleggio
     private Double dailyCost;    // Costo giornaliero noleggio
     private Double totalCost;   // Costo totale noleggio
     private Boolean isPaid;      // Flag pagato
 
-    @ManyToMany
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicle vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private Seller seller_id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer_id;
+
+    /*@ManyToMany
     @JoinTable(
             name="RENT_VEHICLE",
             joinColumns=@JoinColumn(name="RENT_ID", referencedColumnName="rentId"),
@@ -37,7 +52,7 @@ public class RentInfo {
 
     @ManyToOne
     @JoinColumn(name = "users_id")
-    private User user;
+    private User user;*/
 
 
     //TODO totalCost should be calculated by the program, not the user

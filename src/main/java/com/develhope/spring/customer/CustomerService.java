@@ -47,10 +47,11 @@ public class CustomerService {
     //TODO custom query order repository
     //Da testare
 
-    public List<OrderInfo> getOrders(long id) {
-        List<OrderInfo> myorders = orderRepository.findByUserId(id);
+    //TODO Ronnie fix this
+    /*public List<OrderInfo> getOrders(long id) {
+        List<OrderInfo> myorders = orderRepository.findByCustomer_Id(id);
         return myorders;
-    }
+    }*/
 
     public boolean deleteOrder(long idOrder) {
         Optional<OrderInfo> orderToDelete = orderRepository.findById(idOrder);

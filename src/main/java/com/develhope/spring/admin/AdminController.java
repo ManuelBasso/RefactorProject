@@ -55,10 +55,12 @@ public class AdminController {
     }
 
     // creazione nuovo ordine per un utente specifico
-    //tested: I tried and I fail :)
-    @PostMapping("/{userid}/{vehicleid}/createOrderForAUser")
+    //tested: I tried and I fail :) // ;(
+
+    //TODO Ronnie fix this
+    /*@PostMapping("/{userid}/{vehicleid}/createOrderForAUser")
     public OrderInfo creatOrderForUser(@PathVariable Long user_id,@PathVariable Long vehicle_Id,@RequestParam boolean advance) {
         return adminServices.createOrderForAUser(user_id,vehicle_Id,advance);
-    }
+    }*/
 
 }

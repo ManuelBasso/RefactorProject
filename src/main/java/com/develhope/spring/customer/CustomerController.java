@@ -32,10 +32,10 @@ public class CustomerController {
     }
 
     //tested: not ok!
-    @GetMapping("/{idUser}/getOrders")
+    /*@GetMapping("/{idUser}/getOrders")
     public List<OrderInfo> getOrders(@PathVariable long idUser) {
         return customerService.getOrders(idUser);
-    }
+    }*/
 
     //Cancellare un ordine
     //tested: ok

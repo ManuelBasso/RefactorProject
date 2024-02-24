@@ -1,8 +1,9 @@
 spring:
   datasource:
-    username: sql11685277
-    url: jdbc:mysql://sql11.freesqldatabase.com:3306/sql11685277
-    password: KyuRdLVwtZ
+    url: jdbc:mysql://127.0.0.1:3306/project
+    username: root
+    password: admin
+    driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update

@@ -1,6 +1,8 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.customer.Customer;
+import com.develhope.spring.seller.Seller;
 import com.develhope.spring.user.User;
 
 import jakarta.persistence.*;
@@ -25,7 +27,22 @@ public class OrderInfo {
 
     private Boolean paidInFull;                  //Flag pagato
 
-    @ManyToMany
+    @Enumerated(EnumType.STRING)
+    private OrderStatus orderStatus;             //Stato ordine
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id", nullable = false)
+    private Vehicle vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id", nullable = false)
+    private Seller seller_id;
+
+    @ManyToOne
+    @JoinColumn(name = "customer_id", nullable = false)
+    private Customer customer_id;
+
+    /*@ManyToMany
     @JoinTable(
             name = "ORDER_VEHICLE",
             joinColumns = @JoinColumn(name = "ORDER_ID", referencedColumnName = "orderId"),
@@ -35,9 +52,6 @@ public class OrderInfo {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
-
-    @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;             //Stato ordine
+    private User user;*/
 
 }

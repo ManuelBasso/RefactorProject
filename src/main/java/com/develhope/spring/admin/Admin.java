@@ -18,7 +18,7 @@ public class Admin extends User {
     @SuppressWarnings("unused")
     private Role role = Role.ROLE_ADMIN;
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    /*@ManyToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "administrator_vehicle", joinColumns = @JoinColumn(name = "administrator_id"), inverseJoinColumns = @JoinColumn(name = "vehicle_id"))
-    private List<Vehicle> vehicle;
+    private List<Vehicle> vehicle;*/
 }

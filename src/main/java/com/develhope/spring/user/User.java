@@ -12,7 +12,7 @@ import lombok.*;
 
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+//@Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -34,11 +34,11 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user")
+    /*@OneToMany(mappedBy = "user")
     private List<OrderInfo> order;
 
     @OneToMany(mappedBy = "user")
-    private List<RentInfo> rent;
+    private List<RentInfo> rent;*/
 
     @Enumerated(EnumType.STRING)
     private Role role;

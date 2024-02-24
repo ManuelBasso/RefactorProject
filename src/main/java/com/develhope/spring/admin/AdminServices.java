@@ -128,8 +128,9 @@ public class AdminServices {
         return null;
     }
 
+    //TODO Ronnie fix this
     // creazione ordine per un utente tramite id
-    public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance) throws OrderCreationException {
+    /*public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance) throws OrderCreationException {
         Optional<User> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
@@ -155,7 +156,7 @@ public class AdminServices {
         } catch (Exception e) {
             throw new OrderCreationException("Failed to create order");
         }
-    }
+    }*/
 
     // calcola un aticipo di base che è yguale al trenta percento del costo
     // dell'auto
