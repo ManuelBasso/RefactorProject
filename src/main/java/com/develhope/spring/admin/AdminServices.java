@@ -1,5 +1,11 @@
 package com.develhope.spring.admin;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
+import java.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -10,10 +16,12 @@ import org.springframework.stereotype.Service;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.configurations.OrderCreationException;
+import com.develhope.spring.configurations.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
+import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.RentRepository;
 import com.develhope.spring.user.User;
 import com.develhope.spring.user.UserRepository;
 
@@ -31,6 +39,9 @@ public class AdminServices {
 
     @Autowired
     OrderRepository orderRepository;
+
+    @Autowired
+    RentRepository rentRepository;
 
     // aggiunzione di un veicolo
     public Vehicle addVehicle(Vehicle vehicle) {
@@ -130,14 +141,16 @@ public class AdminServices {
     }
 
     // creazione ordine per un utente tramite id
-    public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance) throws OrderCreationException {
+    public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+            throws OrderRentCreationException {
         Optional<User> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
-            throw new OrderCreationException("Invalid user or vehicle ID");
+            throw new OrderRentCreationException("Invalid user or vehicle ID");
         }
-        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
-            throw new OrderCreationException("Vehicle is not available for order");
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
+                || vehicle.get().getIsAvailable() != VehicleStatus.ORDERABLE) {
+            throw new OrderRentCreationException("Vehicle is not available for order");
         }
         OrderInfo newOrder = new OrderInfo();
         newOrder.setVehicles((List<Vehicle>) vehicle.get());
@@ -154,7 +167,7 @@ public class AdminServices {
             vehicleRepository.save(vehicle.get());
             return newOrder;
         } catch (Exception e) {
-            throw new OrderCreationException("Failed to create order");
+            throw new OrderRentCreationException("Failed to create order");
         }
     }
 
@@ -212,6 +225,44 @@ public class AdminServices {
         optionalOrder.get().setUser(user);
 
         return modifyOrder;
+    }
+
+    // creazione noleggio per un utente tramite id
+    public RentInfo createRentForAUser(Long user_id, Long vehicle_id, OffsetDateTime startDate, OffsetDateTime endDate,
+            Double dailyCost) throws OrderRentCreationException {
+        Optional<User> user = userRepository.findById(user_id);
+        Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
+        if (!user.isPresent() || !vehicle.isPresent()) {
+            throw new OrderRentCreationException("Invalid user or vehicle ID");
+        }
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
+                || vehicle.get().getIsAvailable() != VehicleStatus.REANTABLE) {
+            throw new OrderRentCreationException("Vehicle is not available for rent");
+        }
+        RentInfo newRent = new RentInfo();
+        newRent.setVehicles((List<Vehicle>) vehicle.get());
+        newRent.setUser(user.get());
+        newRent.setStartDate(startDate);
+        newRent.setEndDate(endDate);
+        // il costo giornaliero deve essere implementato con una logica simile
+        // all'anticipo
+        // quindi è da cambiare
+        newRent.setDailyCost(dailyCost);
+        newRent.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
+        newRent.setIsPaid(false);
+        try {
+            rentRepository.save(newRent);
+            vehicle.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
+            vehicleRepository.save(vehicle.get());
+            return newRent;
+        } catch (Exception e) {
+            throw new OrderRentCreationException("Failed to create rent ");
+        }
+    }
+
+    private Double calculateTotalCost(OffsetDateTime startDate, OffsetDateTime endDate, Double dailyCost) {
+        // TODO implementare logica per costo totale noleggio
+        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalCost'");
     }
 
 }
