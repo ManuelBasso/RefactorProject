@@ -2,6 +2,7 @@ package com.develhope.spring.admin;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -163,6 +164,54 @@ public class AdminServices {
         Vehicle vehicle = vehicleRepository.getReferenceById(vehicle_id);
         double totalAmount = vehicle.getPrice() * 0.3;
         return totalAmount;
+    }
+
+    // eliminazione di un ordine per un cliente tramite id
+    public boolean deleteOrder(Long id) {
+        if (orderRepository.existsById(id)) {
+            orderRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    // modifica di un ordine
+    public OrderInfo modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
+        Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isPresent()) {
+            switch (choice) {
+                case "paidInFull":
+                    optionalOrder.get().setPaidInFull(order.getPaidInFull());
+                    break;
+                case "orderStatus":
+                    optionalOrder.get().setOrderStatus(order.getOrderStatus());
+                    break;
+                case "user":
+                    User user = userRepository.getReferenceById(userId);
+                    optionalOrder.get().setUser(user);
+                    break;
+                case "all":
+                    modifyAllPartOfOrder(id, choice, order, userId, optionalOrder);
+                    break;
+                default:
+
+                    break;
+            }
+            return optionalOrder.get();
+        }
+        return null;
+    }
+
+    // modifica di tutti i parametri un ordine
+    private Optional<OrderInfo> modifyAllPartOfOrder(Long id, String choice, OrderInfo order, Long userId,
+            Optional<OrderInfo> optionalOrder) {
+        Optional<OrderInfo> modifyOrder = optionalOrder;
+        optionalOrder.get().setPaidInFull(order.getPaidInFull());
+        optionalOrder.get().setOrderStatus(order.getOrderStatus());
+        User user = userRepository.getReferenceById(userId);
+        optionalOrder.get().setUser(user);
+
+        return modifyOrder;
     }
 
 }

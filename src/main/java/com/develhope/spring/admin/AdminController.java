@@ -51,10 +51,25 @@ public class AdminController {
         return adminServices.changeStatusVehicle(id, status);
     }
 
-    // creazione nuovo ordine per un utente specifico 
+    // creazione nuovo ordine per un utente specifico
     @PostMapping("/{userid}/{vehicleid}/createOrderForAUser")
-    public OrderInfo creatOrderForUser(@PathVariable Long user_id,@PathVariable Long vehicle_Id,@RequestParam boolean advance) {
-        return adminServices.createOrderForAUser(user_id,vehicle_Id,advance);
+    public OrderInfo creatOrderForUser(@PathVariable Long user_id, @PathVariable Long vehicle_Id,
+            @RequestParam boolean advance) {
+        return adminServices.createOrderForAUser(user_id, vehicle_Id, advance);
+    }
+
+    // eliminazione di un ordine per un cliente tramite id
+
+    @DeleteMapping("/{id}/deleteAOrderById")
+    public boolean deleteOrderById(@PathVariable Long id) {
+        return adminServices.deleteOrder(id);
+    }
+
+    // modifica di un ordine
+    @PutMapping("/{id}/{userid}/modifyOrder")
+    public OrderInfo modifyOrderById(@PathVariable Long id, @PathVariable Long userid,
+            @RequestParam String choice, @RequestBody OrderInfo order) {
+        return adminServices.modifyOrderBy(id, choice, order, userid);
     }
 
 }
