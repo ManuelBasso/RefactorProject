@@ -3,6 +3,11 @@ package com.develhope.spring.admin;
 import java.util.List;
 import java.util.Optional;
 
+import com.develhope.spring.configurations.Role;
+import com.develhope.spring.customer.Customer;
+import com.develhope.spring.customer.CustomerRepository;
+import com.develhope.spring.seller.Seller;
+import com.develhope.spring.seller.SellerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +26,12 @@ public class AdminServices {
 
     @Autowired
     AdminRepository adminRepository;
+
+    @Autowired
+    SellerRepository sellerRepository;
+
+    @Autowired
+    CustomerRepository customerRepository;
 
     @Autowired
     VehicleRepository vehicleRepository;
@@ -166,4 +177,39 @@ public class AdminServices {
         return totalAmount;
     }
 
+    public Admin createAdmin(Admin admin) {
+        Admin newAdmin = new Admin();
+        newAdmin.setFirstName(admin.getFirstName());
+        newAdmin.setLastName(admin.getLastName());
+        newAdmin.setEmail(admin.getEmail());
+        newAdmin.setPassword(admin.getPassword());
+        newAdmin.setRole(admin.getRole());
+        return adminRepository.saveAndFlush(newAdmin);
+    }
+
+    public Seller createSeller(Seller seller) {
+        //if(seller.getRole() == Role.ROLE_SELLER) {
+            Seller newSeller = new Seller();
+            newSeller.setFirstName(seller.getFirstName());
+            newSeller.setLastName(seller.getLastName());
+            newSeller.setEmail(seller.getEmail());
+            newSeller.setPassword(seller.getPassword());
+            newSeller.setPhoneNumber(seller.getPhoneNumber());
+            //newSeller.setRole(Role.ROLE_SELLER);
+            return sellerRepository.saveAndFlush(newSeller);
+        /*}else {
+            return null;
+        }*/
+    }
+
+    public Customer createCustomer(Customer customer) {
+        Customer newCustomer = new Customer();
+        newCustomer.setFirstName(customer.getFirstName());
+        newCustomer.setLastName(customer.getLastName());
+        newCustomer.setEmail(customer.getEmail());
+        newCustomer.setPassword(customer.getPassword());
+        newCustomer.setPhoneNumber(customer.getPhoneNumber());
+        //newCustomer.setRole(customer.getRole());
+        return customerRepository.saveAndFlush(customer);
+    }
 }

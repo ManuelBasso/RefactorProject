@@ -10,11 +10,16 @@ import java.util.List;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Entity
-@Table(name = "Sellers")
+@Getter
+@Setter
+//@Table(name = "Sellers")
 public class Seller extends User {
 
+    @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_SELLER;
     private String phoneNumber;
 

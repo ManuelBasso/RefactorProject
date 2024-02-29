@@ -12,11 +12,12 @@ import java.util.List;
 
 @Entity
 //@PrimaryKeyJoinColumn(name = "customerId")
-@Table(name = "Customers")
+//@Table(name = "Customers")
 @Getter
 @Setter
 public class Customer extends User {
 
+    @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_CUSTOMER;
     private String phoneNumber;
 

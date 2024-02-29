@@ -67,9 +67,9 @@ public class SellerController {
             @ApiResponse(responseCode = "200", description = "Order created"),
             @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
             @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
-    @PostMapping("/createorder/{vehicleId}")
-    public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
-        return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
+    @PostMapping("/createorder/{sellerId}/{customerId}/{vehicleId}")
+    public ResponseEntity<String> createOrder(@PathVariable Long sellerId, @PathVariable Long customerId, @PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
+        return sellerService.createOrderOfAvailableVehicle(sellerId, customerId, vehicleId, newOrder);
     }
 
     //tested: ok

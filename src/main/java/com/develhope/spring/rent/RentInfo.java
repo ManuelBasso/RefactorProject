@@ -6,9 +6,7 @@ import com.develhope.spring.seller.Seller;
 import com.develhope.spring.user.User;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,6 +16,8 @@ import java.util.List;
 @Table(name = "Rents")
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 public class RentInfo {
 
     @Id
@@ -31,7 +31,7 @@ public class RentInfo {
     private Double totalCost;   // Costo totale noleggio
     private Boolean isPaid;      // Flag pagato
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 

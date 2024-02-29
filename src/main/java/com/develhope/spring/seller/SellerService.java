@@ -3,11 +3,15 @@ package com.develhope.spring.seller;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
+import com.develhope.spring.customer.Customer;
+import com.develhope.spring.customer.CustomerRepository;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 
+import com.develhope.spring.user.User;
+import com.develhope.spring.user.UserRepository;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -28,6 +32,12 @@ public class SellerService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
+    @Autowired
+    private SellerRepository sellerRepository;
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
     public Optional<Vehicle> getOneVehicleById(Long id){
         return vehicleRepository.findById(id);
     }
@@ -36,9 +46,33 @@ public class SellerService {
         return orderRepository.getById(id);
     }
 
-    public ResponseEntity<String> createOrderOfAvailableVehicle(Long vehicleId, OrderInfo order){
+    public ResponseEntity<String> createOrderOfAvailableVehicle(Long sellerId, Long customerId, Long vehicleId, OrderInfo order){
         try {
-            Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
+            //Optional<Seller> sellerForOrder = sellerRepository.findById(sellerId);
+            if(!sellerRepository.existsById(sellerId)){
+                return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("Invalid seller ID");
+            }else if(!customerRepository.existsById(customerId)){
+                return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("Invalid customer ID");
+            }else if(!vehicleRepository.existsById(vehicleId)){
+                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with that ID");
+            }else if(vehicleRepository.findById(vehicleId).get().getIsAvailable() != VehicleStatus.AVAILABLE){
+                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("This vehicle is not available");
+            }else if(vehicleRepository.findById(vehicleId).get().getIsAvailable() == VehicleStatus.AVAILABLE){
+                OrderInfo newOrder = new OrderInfo();
+                Optional<Seller> seller = sellerRepository.findById(sellerId);
+                Optional<Customer> customer = customerRepository.findById(customerId);
+                Optional<Vehicle> vehicle = vehicleRepository.findById(vehicleId);
+                newOrder.setAdvancePayment(order.getAdvancePayment());
+                newOrder.setPaidInFull(order.getPaidInFull());
+                newOrder.setOrderStatus(order.getOrderStatus());
+                newOrder.setSeller_id(seller.get());
+                newOrder.setCustomer_id(customer.get());
+                newOrder.setVehicle(vehicle.get());
+                vehicleRepository.findById(vehicleId).get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
+                orderRepository.save(newOrder);
+                return ResponseEntity.ok("Order placed successfully");
+            }
+            /*Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
             if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
                 OrderInfo newOrder = new OrderInfo();
                 newOrder.setAdvancePayment(order.getAdvancePayment());
@@ -51,7 +85,7 @@ public class SellerService {
                 return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not available");
             } else if (vehicleToOrder.isEmpty()) {
                 return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with that ID");
-            }
+            }*/
             return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong in the function body");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong. Exception launched.");

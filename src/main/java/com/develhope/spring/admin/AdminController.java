@@ -1,5 +1,8 @@
 package com.develhope.spring.admin;
 
+import com.develhope.spring.customer.Customer;
+import com.develhope.spring.seller.Seller;
+import com.develhope.spring.user.User;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -25,6 +28,19 @@ public class AdminController {
 
     @Autowired
     private AdminServices adminServices;
+
+    @PostMapping("/create-admin")
+    public Admin createUser(@RequestBody Admin admin){
+        return adminServices.createAdmin(admin);
+    }
+    @PostMapping("/create-seller")
+    public Seller createUser(@RequestBody Seller seller){
+        return adminServices.createSeller(seller);
+    }
+    @PostMapping("/create-customer")
+    public Customer createUser(@RequestBody Customer customer){
+        return adminServices.createCustomer(customer);
+    }
 
     // creazione nuovo veicolo
     //tested:ok

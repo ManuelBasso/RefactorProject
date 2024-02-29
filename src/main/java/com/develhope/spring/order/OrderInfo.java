@@ -6,15 +6,15 @@ import com.develhope.spring.seller.Seller;
 import com.develhope.spring.user.User;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
 @Data
 @Table(name = "Orders")
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderInfo {
@@ -30,7 +30,7 @@ public class OrderInfo {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;             //Stato ordine
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "vehicle_id", nullable = false)
     private Vehicle vehicle;
 

@@ -12,10 +12,11 @@ import lombok.*;
 
 @Entity
 @Data
-@Table(name = "Admins")
+//@Table(name = "Admins")
 public class Admin extends User {
 
     @SuppressWarnings("unused")
+    @Enumerated(EnumType.STRING)
     private Role role = Role.ROLE_ADMIN;
 
     /*@ManyToMany(cascade = CascadeType.ALL)

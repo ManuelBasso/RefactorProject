@@ -14,11 +14,12 @@ import lombok.*;
 @Entity
 //@Inheritance(strategy = InheritanceType.JOINED)
 @Data
+@Table(name = "Users")
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
 
-    @Id()
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
@@ -40,7 +41,7 @@ public class User {
     @OneToMany(mappedBy = "user")
     private List<RentInfo> rent;*/
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    /*@Enumerated(EnumType.STRING)
+    private Role role;*/
 
 }
