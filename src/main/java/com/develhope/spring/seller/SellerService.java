@@ -70,22 +70,8 @@ public class SellerService {
                 newOrder.setVehicle(vehicle.get());
                 vehicleRepository.findById(vehicleId).get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
                 orderRepository.save(newOrder);
-                return ResponseEntity.ok("Order placed successfully");
+                return ResponseEntity.ok("Order placed successfully!");
             }
-            /*Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
-            if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
-                OrderInfo newOrder = new OrderInfo();
-                newOrder.setAdvancePayment(order.getAdvancePayment());
-                newOrder.setPaidInFull(order.getPaidInFull());
-                newOrder.setOrderStatus(order.getOrderStatus());
-                vehicleToOrder.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
-                orderRepository.save(newOrder);
-                return ResponseEntity.ok("Order placed successfully");
-            } else if (vehicleToOrder.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not available");
-            } else if (vehicleToOrder.isEmpty()) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with that ID");
-            }*/
             return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong in the function body");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong. Exception launched.");
