@@ -1,4 +1,6 @@
+/*
 package com.develhope.spring.configurations;
+
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -35,7 +37,7 @@ public class WebSecurityConfig {
 		return http.build();
 	}
 
-	/*@Bean
+	@Bean
 	public UserDetailsService userDetailsService() {
 		// da modificare 
 		PasswordEncoder encoder = BCryptPasswordEncoder.getInstance();
@@ -53,5 +55,6 @@ public class WebSecurityConfig {
 				.build();
 
 		return new InMemoryUserDetailsManager(user1, user2);
-	}*/
-}
+	}
+}*/
+
