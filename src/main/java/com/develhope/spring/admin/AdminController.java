@@ -9,9 +9,12 @@ import org.springframework.web.bind.annotation.RestController;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.rent.RentInfo;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.time.OffsetDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -79,4 +82,25 @@ public class AdminController {
         return adminServices.createOrderForAUser(user_id,vehicle_Id,advance);
     }*/
 
+    // eliminazione di un ordine per un cliente tramite id
+
+    @DeleteMapping("/{id}/deleteAOrderById")
+    public boolean deleteOrderById(@PathVariable Long id) {
+        return adminServices.deleteOrder(id);
+    }
+
+    // modifica di un ordine
+    @PutMapping("/{id}/{userid}/modifyOrder")
+    public OrderInfo modifyOrderById(@PathVariable Long id, @PathVariable Long userid,
+            @RequestParam String choice, @RequestBody OrderInfo order) {
+        return adminServices.modifyOrderBy(id, choice, order, userid);
+    }
+
+    // creazione nuovo noleggio per un utente specifico
+    @PostMapping("/{userid}/{vehicleid}/createRentForAUser")
+    public RentInfo creatRentForUser(@PathVariable Long user_id, @PathVariable Long vehicle_Id,
+            @RequestParam OffsetDateTime startDate,
+            @RequestParam OffsetDateTime endDate, @RequestParam Double dailyCost) {
+        return adminServices.createRentForAUser(user_id, vehicle_Id, startDate, endDate, dailyCost);
+    }
 }
