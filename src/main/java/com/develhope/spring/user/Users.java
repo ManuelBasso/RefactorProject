@@ -1,22 +1,19 @@
 package com.develhope.spring.user;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
-import com.develhope.spring.configurations.Role;
-import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.role.Role;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-
 
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class User {
+public class Users {
 
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -34,13 +31,8 @@ public class User {
     @Column(nullable = false)
     private String password;
 
-    @OneToMany(mappedBy = "user")
-    private List<OrderInfo> order;
-
-    @OneToMany(mappedBy = "user")
-    private List<RentInfo> rent;
-
-    @Enumerated(EnumType.STRING)
-    private Role role;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "users_role", joinColumns = @JoinColumn(name = "users_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> role = new HashSet<>();
 
 }

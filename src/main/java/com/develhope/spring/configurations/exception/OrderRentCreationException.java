@@ -1,4 +1,4 @@
-package com.develhope.spring.configurations;
+package com.develhope.spring.configurations.exception;
 
 public class OrderRentCreationException extends RuntimeException {
 

@@ -1,14 +1,12 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.user.User;
+import com.develhope.spring.user.Users;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
 
 @Entity
 @Data
@@ -21,23 +19,19 @@ public class OrderInfo {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
 
-    private Double advancePayment;               //Anticipo
+    private Double advancePayment; // Anticipo
 
-    private Boolean paidInFull;                  //Flag pagato
-
-    @ManyToMany
-    @JoinTable(
-            name = "ORDER_VEHICLE",
-            joinColumns = @JoinColumn(name = "ORDER_ID", referencedColumnName = "orderId"),
-            inverseJoinColumns = @JoinColumn(name = "VEHICLE_ID", referencedColumnName = "vehicleId"))
-    private List<Vehicle> vehicles;
-
+    private Boolean paidInFull; // Flag pagato
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "customer_id")
+    private Users customer;
+
+    @ManyToOne
+    @JoinColumn(name = "vehicle_id")
+    private Vehicle vehicle;
 
     @Enumerated(EnumType.STRING)
-    private OrderStatus orderStatus;             //Stato ordine
+    private OrderStatus orderStatus; // Stato ordine
 
 }

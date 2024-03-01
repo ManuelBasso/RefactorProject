@@ -1,14 +1,8 @@
-package com.develhope.spring.admin;
+package com.develhope.spring.user.admin;
 
-import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,20 +10,17 @@ import org.springframework.stereotype.Service;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.configurations.OrderRentCreationException;
+import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
-import com.develhope.spring.user.User;
+import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
 
 @Service
 public class AdminServices {
-
-    @Autowired
-    AdminRepository adminRepository;
 
     @Autowired
     VehicleRepository vehicleRepository;
@@ -143,7 +134,7 @@ public class AdminServices {
     // creazione ordine per un utente tramite id
     public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
-        Optional<User> user = userRepository.findById(user_id);
+        Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -153,13 +144,13 @@ public class AdminServices {
             throw new OrderRentCreationException("Vehicle is not available for order");
         }
         OrderInfo newOrder = new OrderInfo();
-        newOrder.setVehicles((List<Vehicle>) vehicle.get());
+        newOrder.setVehicle(vehicle.get());
         // se l'acquirente paga un anticipo si chiama il metodo getAdvancePaymentAmount
         // altrimenti si restituisce null
         // su advance payment
         newOrder.setAdvancePayment(advance ? getAdvancePaymentAmount(vehicle_id) : null);
         newOrder.setPaidInFull(false);
-        newOrder.setUser(user.get());
+        newOrder.setCustomer(user.get());
         newOrder.setOrderStatus(OrderStatus.INCOMPLETE);
         try {
             orderRepository.save(newOrder);
@@ -200,8 +191,8 @@ public class AdminServices {
                     optionalOrder.get().setOrderStatus(order.getOrderStatus());
                     break;
                 case "user":
-                    User user = userRepository.getReferenceById(userId);
-                    optionalOrder.get().setUser(user);
+                    Users user = userRepository.getReferenceById(userId);
+                    optionalOrder.get().setCustomer(user);
                     break;
                 case "all":
                     modifyAllPartOfOrder(id, choice, order, userId, optionalOrder);
@@ -221,8 +212,8 @@ public class AdminServices {
         Optional<OrderInfo> modifyOrder = optionalOrder;
         optionalOrder.get().setPaidInFull(order.getPaidInFull());
         optionalOrder.get().setOrderStatus(order.getOrderStatus());
-        User user = userRepository.getReferenceById(userId);
-        optionalOrder.get().setUser(user);
+        Users user = userRepository.getReferenceById(userId);
+        optionalOrder.get().setCustomer(user);
 
         return modifyOrder;
     }
@@ -230,7 +221,7 @@ public class AdminServices {
     // creazione noleggio per un utente tramite id
     public RentInfo createRentForAUser(Long user_id, Long vehicle_id, OffsetDateTime startDate, OffsetDateTime endDate,
             Double dailyCost) throws OrderRentCreationException {
-        Optional<User> user = userRepository.findById(user_id);
+        Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -240,10 +231,10 @@ public class AdminServices {
             throw new OrderRentCreationException("Vehicle is not available for rent");
         }
         RentInfo newRent = new RentInfo();
-        newRent.setVehicles((List<Vehicle>) vehicle.get());
-        newRent.setUser(user.get());
-        newRent.setStartDate(startDate);
-        newRent.setEndDate(endDate);
+        newRent.setVehicle(vehicle.get());
+        newRent.setCustomer(user.get());
+        // newRent.setStartDate(startDate);
+        // newRent.setEndDate(endDate);
         // il costo giornaliero deve essere implementato con una logica simile
         // all'anticipo
         // quindi è da cambiare
@@ -263,6 +254,10 @@ public class AdminServices {
     private Double calculateTotalCost(OffsetDateTime startDate, OffsetDateTime endDate, Double dailyCost) {
         // TODO implementare logica per costo totale noleggio
         throw new UnsupportedOperationException("Unimplemented method 'calculateTotalCost'");
+    }
+
+    public List<Vehicle> getVehicle() {
+       return vehicleRepository.findAll();
     }
 
 }
