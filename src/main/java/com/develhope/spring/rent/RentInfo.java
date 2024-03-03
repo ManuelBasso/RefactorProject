@@ -2,7 +2,6 @@ package com.develhope.spring.rent;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.user.Users;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;

@@ -1,11 +1,6 @@
 package com.develhope.spring.car;
 
-import java.util.List;
-
-import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.user.Users;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -51,11 +46,6 @@ public class Vehicle {
     @JoinColumn(name = "seller_id")
     private Users seller;
 
-    @OneToMany(mappedBy = "vehicle")
-    private List<OrderInfo> orders;
-
-    @OneToMany(mappedBy = "vehicle")
-    private List<RentInfo> rents;
 }
 
 /*

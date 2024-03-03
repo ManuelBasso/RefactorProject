@@ -4,12 +4,15 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
+import com.develhope.spring.configurations.dto.ReqRes;
 import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
@@ -34,9 +37,29 @@ public class AdminServices {
     @Autowired
     RentRepository rentRepository;
 
+    // tutti i veicoli
+    public ResponseEntity<Object> getVehicle() {
+        return ResponseEntity.ok(vehicleRepository.findAll());
+    }
+
     // aggiunzione di un veicolo
-    public Vehicle addVehicle(Vehicle vehicle) {
-        return vehicleRepository.saveAndFlush(vehicle);
+    public ResponseEntity<Object> addVehicle(Vehicle newVehicle) {
+        Vehicle addVehicle = new Vehicle();
+        addVehicle.setAccessories(newVehicle.getAccessories());
+        addVehicle.setBrand(newVehicle.getBrand());
+        addVehicle.setColor(newVehicle.getColor());
+        addVehicle.setDiscount(newVehicle.getDiscount());
+        addVehicle.setDisplacement(newVehicle.getDisplacement());
+        addVehicle.setFuelType(newVehicle.getFuelType());
+        addVehicle.setGearboxType(newVehicle.getGearboxType());
+        addVehicle.setIsAvailable(newVehicle.getIsAvailable());
+        addVehicle.setIsNew(newVehicle.getIsNew());
+        addVehicle.setModel(newVehicle.getModel());
+        addVehicle.setPower(newVehicle.getPower());
+        addVehicle.setPrice(newVehicle.getPrice());
+        addVehicle.setYearOfRegistration(newVehicle.getYearOfRegistration());
+
+        return ResponseEntity.ok(vehicleRepository.save(addVehicle));
     }
 
     // metodo per la modifica di un solo parametro del veicolo
@@ -256,8 +279,8 @@ public class AdminServices {
         throw new UnsupportedOperationException("Unimplemented method 'calculateTotalCost'");
     }
 
-    public List<Vehicle> getVehicle() {
-       return vehicleRepository.findAll();
+    public List<OrderInfo> getOrder() {
+        return orderRepository.findAll();
     }
 
 }

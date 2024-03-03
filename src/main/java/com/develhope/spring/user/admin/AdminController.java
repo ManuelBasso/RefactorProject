@@ -8,14 +8,13 @@ import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.rent.RentInfo;
 
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.OffsetDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -24,48 +23,50 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 @Tag(name = "Admin options", description = "Here are all functions needed for our admins")
 @RestController
-@RequestMapping("/admin")
-@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminController {
 
     @Autowired
     private AdminServices adminServices;
 
-    @GetMapping("/gettAllVehicle")
-    public List<Vehicle> getVehicle() {
+    // vedere quali veicolo esistono , accessibile a tutti i tipi di utente
+    @GetMapping("/public/gettAllVehicle")
+    public ResponseEntity<Object> getVehicle() {
         return adminServices.getVehicle();
     }
-    
 
     // creazione nuovo veicolo
-    // tested:ok
-    @PostMapping("/addVehicle")
-    public Vehicle addAVehicle(@RequestBody Vehicle vehicle) {
-        return adminServices.addVehicle(vehicle);
+
+    @PostMapping("/admin/addVehicle")
+    public ResponseEntity<Object> addAVehicle(@RequestBody Vehicle newVehicle) {
+        return adminServices.addVehicle(newVehicle);
     }
 
     // modifica dei parametri di un veicolo
-    // tested: ok but added saveAndFlush in service to update db
+
     @PutMapping("/{id}/modifyAVehicle")
     public Vehicle modifVehicleById(@PathVariable Long id, @RequestParam String choice, @RequestBody Vehicle vehicle) {
         return adminServices.modifyVehicle(id, choice, vehicle);
     }
 
     // eliminazione veicolo tramite id
-    // tested: ok
+
     @DeleteMapping("/{id}/deleteVehicleById")
     public boolean deleteVehicleById(@PathVariable Long id) {
         return adminServices.deleteVehicle(id);
     }
 
     // cambio dello stato di un veicolo
-    // tested: ok but added saveAndFlush in service to update db
+
     @PatchMapping("/{id}/changeStatusOfAVehicle")
     public Vehicle changeStatusOfAVehicle(@PathVariable Long id, @RequestParam VehicleStatus status) {
         return adminServices.changeStatusVehicle(id, status);
+    }
+
+    @GetMapping("/getAllOrder")
+    public List<OrderInfo> getOrder() {
+        return adminServices.getOrder();
     }
 
     // creazione nuovo ordine per un utente specifico

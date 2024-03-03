@@ -13,7 +13,6 @@ import java.util.List;
 @Tag(name = "Customer options", description = "Here are all functions needed for our customers")
 @RestController
 @RequestMapping("/customer")
-@PreAuthorize("hasRole('ROLE_CUSTOMER')")
 public class CustomerController {
 
     @Autowired
