@@ -20,13 +20,13 @@ public class RentInfo {
         @GeneratedValue(strategy = GenerationType.IDENTITY)
         private Long rentId;
 
-        private OffsetDateTime startDate; // Data inizio noleggio
-        private OffsetDateTime endDate; // Data fine noleggio
+        private String startDate; // Data inizio noleggio
+        private String endDate; // Data fine noleggio
         private Double dailyCost; // Costo giornaliero noleggio
         private Double totalCost; // Costo totale noleggio
         private Boolean isPaid; // Flag pagato
 
-        @ManyToOne
+        @ManyToOne(cascade = CascadeType.REMOVE)
         @JoinColumn(name = "vehicle_id")
         private Vehicle vehicle;
 

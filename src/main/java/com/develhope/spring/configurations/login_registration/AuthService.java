@@ -45,15 +45,15 @@ public class AuthService {
             users.setEmail(registrationRequest.getEmail());
             users.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
-            // 1. Save the roles first
+            
             Set<Role> savedRoles = new HashSet<>();
             for (String roleName : registrationRequest.getRole()) {
                 Role role = new Role();
                 role.setName(Role.RoleType.valueOf(roleName));
-                savedRoles.add(roleRepository.save(role)); // Save each role
+                savedRoles.add(roleRepository.save(role)); 
             }
 
-            users.setRole(savedRoles); // Add saved roles to the user
+            users.setRole(savedRoles); 
             Users usersResult = userRepository.save(users);
             if (usersResult != null && usersResult.getId() > 0) {
                 resp.setOurUsers(usersResult);

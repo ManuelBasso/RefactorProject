@@ -1,5 +1,6 @@
 package com.develhope.spring.user.admin;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -37,12 +38,16 @@ public class AdminServices {
     @Autowired
     RentRepository rentRepository;
 
+    // --------------- logica dei controller per operazioni sui ordini -------------
+
     // tutti i veicoli
+    // ok
     public ResponseEntity<Object> getVehicle() {
         return ResponseEntity.ok(vehicleRepository.findAll());
     }
 
     // aggiunzione di un veicolo
+    // ok
     public ResponseEntity<Object> addVehicle(Vehicle newVehicle) {
         Vehicle addVehicle = new Vehicle();
         addVehicle.setAccessories(newVehicle.getAccessories());
@@ -63,7 +68,8 @@ public class AdminServices {
     }
 
     // metodo per la modifica di un solo parametro del veicolo
-    public Vehicle modifyVehicle(Long id, String choice, Vehicle vehicle) {
+    // ok
+    public ResponseEntity<Object> modifyVehicle(Long id, String choice, Vehicle vehicle) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             switch (choice) {
@@ -110,12 +116,13 @@ public class AdminServices {
 
                     break;
             }
-            return vehicleRepository.saveAndFlush(optionalVehicle.get());
+            return ResponseEntity.ok(vehicleRepository.saveAndFlush(optionalVehicle.get()));
         }
         return null;
     }
 
     // metodo per la modifica di tutti i parametri del veicolo
+    // ok
     public Optional<Vehicle> modifyAllPartOfVehicle(Long id, String choice, Vehicle vehicle,
             Optional<Vehicle> optionalVehicle) {
         Optional<Vehicle> modifyOptionaVehicle = optionalVehicle;
@@ -135,6 +142,7 @@ public class AdminServices {
     }
 
     // eliminazione di un veicolo
+    // ok
     public boolean deleteVehicle(Long id) {
         if (vehicleRepository.existsById(id)) {
             vehicleRepository.deleteById(id);
@@ -144,26 +152,35 @@ public class AdminServices {
     }
 
     // cambio dello Status di un veicolo
-    public Vehicle changeStatusVehicle(Long id, VehicleStatus status) {
+    // ok
+    public ResponseEntity<Object> changeStatusVehicle(Long id, VehicleStatus status) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle updatedVehicle = optionalVehicle.get();
             updatedVehicle.setIsAvailable(status);
-            return vehicleRepository.saveAndFlush(updatedVehicle);
+            return ResponseEntity.ok(vehicleRepository.saveAndFlush(updatedVehicle));
         }
         return null;
     }
 
+    // --------------- logica dei controller per operazioni sui ordini -------------
+
+    // ottenere tutti gli ordini
+    // ok
+    public ResponseEntity<Object> getOrder() {
+        return ResponseEntity.ok(orderRepository.findAll());
+    }
+
     // creazione ordine per un utente tramite id
-    public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+    // ok
+    public ResponseEntity<Object> createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
         }
-        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
-                || vehicle.get().getIsAvailable() != VehicleStatus.ORDERABLE) {
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for order");
         }
         OrderInfo newOrder = new OrderInfo();
@@ -176,10 +193,9 @@ public class AdminServices {
         newOrder.setCustomer(user.get());
         newOrder.setOrderStatus(OrderStatus.INCOMPLETE);
         try {
-            orderRepository.save(newOrder);
             vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
             vehicleRepository.save(vehicle.get());
-            return newOrder;
+            return ResponseEntity.ok(orderRepository.save(newOrder));
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create order");
         }
@@ -194,6 +210,7 @@ public class AdminServices {
     }
 
     // eliminazione di un ordine per un cliente tramite id
+    // ok
     public boolean deleteOrder(Long id) {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
@@ -203,7 +220,8 @@ public class AdminServices {
     }
 
     // modifica di un ordine
-    public OrderInfo modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
+    // ok
+    public ResponseEntity<Object> modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
             switch (choice) {
@@ -224,7 +242,7 @@ public class AdminServices {
 
                     break;
             }
-            return optionalOrder.get();
+            return ResponseEntity.ok(orderRepository.saveAndFlush(optionalOrder.get()));
         }
         return null;
     }
@@ -241,23 +259,25 @@ public class AdminServices {
         return modifyOrder;
     }
 
+    // --------------- logica dei controller per operazioni sui noleggi
+    // -------------
+
     // creazione noleggio per un utente tramite id
-    public RentInfo createRentForAUser(Long user_id, Long vehicle_id, OffsetDateTime startDate, OffsetDateTime endDate,
+    public ResponseEntity<Object> createRentForAUser(Long user_id, Long vehicle_id, String startDate, String endDate,
             Double dailyCost) throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
         }
-        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
-                || vehicle.get().getIsAvailable() != VehicleStatus.REANTABLE) {
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for rent");
         }
         RentInfo newRent = new RentInfo();
         newRent.setVehicle(vehicle.get());
         newRent.setCustomer(user.get());
-        // newRent.setStartDate(startDate);
-        // newRent.setEndDate(endDate);
+        newRent.setStartDate(startDate);
+        newRent.setEndDate(endDate);
         // il costo giornaliero deve essere implementato con una logica simile
         // all'anticipo
         // quindi è da cambiare
@@ -265,22 +285,25 @@ public class AdminServices {
         newRent.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
         newRent.setIsPaid(false);
         try {
-            rentRepository.save(newRent);
+
             vehicle.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
             vehicleRepository.save(vehicle.get());
-            return newRent;
+            return ResponseEntity.ok(rentRepository.save(newRent));
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create rent ");
         }
     }
 
-    private Double calculateTotalCost(OffsetDateTime startDate, OffsetDateTime endDate, Double dailyCost) {
-        // TODO implementare logica per costo totale noleggio
-        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalCost'");
-    }
+    // calcolo totale del noleggio
+    private Double calculateTotalCost(String startDate, String endDate, Double dailyCost) {
+        OffsetDateTime rentStartDate = OffsetDateTime.parse(startDate);
+        OffsetDateTime rentEndDate = OffsetDateTime.parse(startDate);
 
-    public List<OrderInfo> getOrder() {
-        return orderRepository.findAll();
+        Duration duration = Duration.between(rentStartDate, rentEndDate);
+        long rentalDays = duration.toDays();
+
+        double totalCost = rentalDays * dailyCost;
+        return totalCost;
     }
 
 }
