@@ -2,10 +2,9 @@ package com.develhope.spring.user.admin;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.util.List;
+
 import java.util.Optional;
 
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,7 @@ import org.springframework.stereotype.Service;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.configurations.dto.ReqRes;
+
 import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
@@ -297,7 +296,7 @@ public class AdminServices {
     // calcolo totale del noleggio
     private Double calculateTotalCost(String startDate, String endDate, Double dailyCost) {
         OffsetDateTime rentStartDate = OffsetDateTime.parse(startDate);
-        OffsetDateTime rentEndDate = OffsetDateTime.parse(startDate);
+        OffsetDateTime rentEndDate = OffsetDateTime.parse(endDate);
 
         Duration duration = Duration.between(rentStartDate, rentEndDate);
         long rentalDays = duration.toDays();
