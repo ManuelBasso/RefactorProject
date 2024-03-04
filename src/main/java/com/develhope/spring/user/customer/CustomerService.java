@@ -1,4 +1,4 @@
-package com.develhope.spring.customer;
+package com.develhope.spring.user.customer;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
@@ -8,7 +8,7 @@ import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
 
-import com.develhope.spring.user.User;
+import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,9 +18,6 @@ import java.util.Optional;
 
 @Service
 public class CustomerService {
-
-    @Autowired
-    CustomerRepository customerRepository;
 
     @Autowired
     VehicleRepository vehicleRepository;
@@ -34,8 +31,7 @@ public class CustomerService {
     @Autowired
     UserRepository userRepository;
 
-
-    public User createCustomer(User user) {
+    public Users createCustomer(Users user) {
         return userRepository.saveAndFlush(user);
     }
 
@@ -44,11 +40,11 @@ public class CustomerService {
         return vehicleToFind.orElse(null);
     }
 
-    //TODO custom query order repository
-    //Da testare
+    // TODO custom query order repository
+    // Da testare
 
     public List<OrderInfo> getOrders(long id) {
-        List<OrderInfo> myorders = orderRepository.findByUserId(id);
+        List<OrderInfo> myorders = orderRepository.findByCustomer_Id(id);
         return myorders;
     }
 
@@ -62,7 +58,6 @@ public class CustomerService {
         }
     }
 
-
     public boolean deleteRent(long idRent) {
         Optional<RentInfo> rentToDelete = rentRepository.findById(idRent);
         if (rentToDelete.isPresent()) {
@@ -73,8 +68,8 @@ public class CustomerService {
         }
     }
 
-    public User updateCustomer(long id, User user) {
-        Optional<User> userToUpdate = userRepository.findById(id);
+    public Users updateCustomer(long id, Users user) {
+        Optional<Users> userToUpdate = userRepository.findById(id);
         if (userToUpdate.isPresent()) {
             userToUpdate.get().setFirstName(user.getFirstName());
             userToUpdate.get().setLastName(user.getLastName());
@@ -87,6 +82,4 @@ public class CustomerService {
         }
     }
 
-
 }
-

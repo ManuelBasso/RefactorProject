@@ -1,10 +1,9 @@
 package com.develhope.spring.car;
 
 public enum VehicleStatus {
-    AVAILABLE, // Disponibile, quindi acquistabile
+    AVAILABLE, // Disponibile, quindi acquistabile o noleggiabile
     NOT_AVAILABLE, // Non disponibile
-    ORDERABLE, // Ordinabile
-    REANTABLE,// Affittabile
-    ORDERED 
+    ORDERED,
+    RENTERED
 
 }

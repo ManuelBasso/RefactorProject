@@ -1,35 +1,29 @@
-package com.develhope.spring.admin;
+package com.develhope.spring.user.admin;
 
-import java.time.LocalDate;
+import java.time.Duration;
 import java.time.OffsetDateTime;
-import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDate;
-import java.util.List;
+
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.configurations.OrderRentCreationException;
+
+import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
-import com.develhope.spring.user.User;
+import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
 
 @Service
 public class AdminServices {
-
-    @Autowired
-    AdminRepository adminRepository;
 
     @Autowired
     VehicleRepository vehicleRepository;
@@ -43,13 +37,38 @@ public class AdminServices {
     @Autowired
     RentRepository rentRepository;
 
+    // --------------- logica dei controller per operazioni sui ordini -------------
+
+    // tutti i veicoli
+    // ok
+    public ResponseEntity<Object> getVehicle() {
+        return ResponseEntity.ok(vehicleRepository.findAll());
+    }
+
     // aggiunzione di un veicolo
-    public Vehicle addVehicle(Vehicle vehicle) {
-        return vehicleRepository.saveAndFlush(vehicle);
+    // ok
+    public ResponseEntity<Object> addVehicle(Vehicle newVehicle) {
+        Vehicle addVehicle = new Vehicle();
+        addVehicle.setAccessories(newVehicle.getAccessories());
+        addVehicle.setBrand(newVehicle.getBrand());
+        addVehicle.setColor(newVehicle.getColor());
+        addVehicle.setDiscount(newVehicle.getDiscount());
+        addVehicle.setDisplacement(newVehicle.getDisplacement());
+        addVehicle.setFuelType(newVehicle.getFuelType());
+        addVehicle.setGearboxType(newVehicle.getGearboxType());
+        addVehicle.setIsAvailable(newVehicle.getIsAvailable());
+        addVehicle.setIsNew(newVehicle.getIsNew());
+        addVehicle.setModel(newVehicle.getModel());
+        addVehicle.setPower(newVehicle.getPower());
+        addVehicle.setPrice(newVehicle.getPrice());
+        addVehicle.setYearOfRegistration(newVehicle.getYearOfRegistration());
+
+        return ResponseEntity.ok(vehicleRepository.save(addVehicle));
     }
 
     // metodo per la modifica di un solo parametro del veicolo
-    public Vehicle modifyVehicle(Long id, String choice, Vehicle vehicle) {
+    // ok
+    public ResponseEntity<Object> modifyVehicle(Long id, String choice, Vehicle vehicle) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             switch (choice) {
@@ -96,12 +115,13 @@ public class AdminServices {
 
                     break;
             }
-            return vehicleRepository.saveAndFlush(optionalVehicle.get());
+            return ResponseEntity.ok(vehicleRepository.saveAndFlush(optionalVehicle.get()));
         }
         return null;
     }
 
     // metodo per la modifica di tutti i parametri del veicolo
+    // ok
     public Optional<Vehicle> modifyAllPartOfVehicle(Long id, String choice, Vehicle vehicle,
             Optional<Vehicle> optionalVehicle) {
         Optional<Vehicle> modifyOptionaVehicle = optionalVehicle;
@@ -121,6 +141,7 @@ public class AdminServices {
     }
 
     // eliminazione di un veicolo
+    // ok
     public boolean deleteVehicle(Long id) {
         if (vehicleRepository.existsById(id)) {
             vehicleRepository.deleteById(id);
@@ -130,42 +151,50 @@ public class AdminServices {
     }
 
     // cambio dello Status di un veicolo
-    public Vehicle changeStatusVehicle(Long id, VehicleStatus status) {
+    // ok
+    public ResponseEntity<Object> changeStatusVehicle(Long id, VehicleStatus status) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle updatedVehicle = optionalVehicle.get();
             updatedVehicle.setIsAvailable(status);
-            return vehicleRepository.saveAndFlush(updatedVehicle);
+            return ResponseEntity.ok(vehicleRepository.saveAndFlush(updatedVehicle));
         }
         return null;
     }
 
+    // --------------- logica dei controller per operazioni sui ordini -------------
+
+    // ottenere tutti gli ordini
+    // ok
+    public ResponseEntity<Object> getOrder() {
+        return ResponseEntity.ok(orderRepository.findAll());
+    }
+
     // creazione ordine per un utente tramite id
-    public OrderInfo createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+    // ok
+    public ResponseEntity<Object> createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
-        Optional<User> user = userRepository.findById(user_id);
+        Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
         }
-        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
-                || vehicle.get().getIsAvailable() != VehicleStatus.ORDERABLE) {
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for order");
         }
         OrderInfo newOrder = new OrderInfo();
-        newOrder.setVehicles((List<Vehicle>) vehicle.get());
+        newOrder.setVehicle(vehicle.get());
         // se l'acquirente paga un anticipo si chiama il metodo getAdvancePaymentAmount
         // altrimenti si restituisce null
         // su advance payment
         newOrder.setAdvancePayment(advance ? getAdvancePaymentAmount(vehicle_id) : null);
         newOrder.setPaidInFull(false);
-        newOrder.setUser(user.get());
+        newOrder.setCustomer(user.get());
         newOrder.setOrderStatus(OrderStatus.INCOMPLETE);
         try {
-            orderRepository.save(newOrder);
             vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
             vehicleRepository.save(vehicle.get());
-            return newOrder;
+            return ResponseEntity.ok(orderRepository.save(newOrder));
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create order");
         }
@@ -180,6 +209,7 @@ public class AdminServices {
     }
 
     // eliminazione di un ordine per un cliente tramite id
+    // ok
     public boolean deleteOrder(Long id) {
         if (orderRepository.existsById(id)) {
             orderRepository.deleteById(id);
@@ -189,7 +219,8 @@ public class AdminServices {
     }
 
     // modifica di un ordine
-    public OrderInfo modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
+    // ok
+    public ResponseEntity<Object> modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
             switch (choice) {
@@ -200,8 +231,8 @@ public class AdminServices {
                     optionalOrder.get().setOrderStatus(order.getOrderStatus());
                     break;
                 case "user":
-                    User user = userRepository.getReferenceById(userId);
-                    optionalOrder.get().setUser(user);
+                    Users user = userRepository.getReferenceById(userId);
+                    optionalOrder.get().setCustomer(user);
                     break;
                 case "all":
                     modifyAllPartOfOrder(id, choice, order, userId, optionalOrder);
@@ -210,7 +241,7 @@ public class AdminServices {
 
                     break;
             }
-            return optionalOrder.get();
+            return ResponseEntity.ok(orderRepository.saveAndFlush(optionalOrder.get()));
         }
         return null;
     }
@@ -221,27 +252,34 @@ public class AdminServices {
         Optional<OrderInfo> modifyOrder = optionalOrder;
         optionalOrder.get().setPaidInFull(order.getPaidInFull());
         optionalOrder.get().setOrderStatus(order.getOrderStatus());
-        User user = userRepository.getReferenceById(userId);
-        optionalOrder.get().setUser(user);
+        Users user = userRepository.getReferenceById(userId);
+        optionalOrder.get().setCustomer(user);
 
         return modifyOrder;
     }
 
+    // --------------- logica dei controller per operazioni sui noleggi
+    // -------------
+
+    // ottenere tutti i noleggi
+    public ResponseEntity<Object> getallRent() {
+        return ResponseEntity.ok(rentRepository.findAll());
+    }
+
     // creazione noleggio per un utente tramite id
-    public RentInfo createRentForAUser(Long user_id, Long vehicle_id, OffsetDateTime startDate, OffsetDateTime endDate,
+    public ResponseEntity<Object> createRentForAUser(Long user_id, Long vehicle_id, String startDate, String endDate,
             Double dailyCost) throws OrderRentCreationException {
-        Optional<User> user = userRepository.findById(user_id);
+        Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
         }
-        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
-                || vehicle.get().getIsAvailable() != VehicleStatus.REANTABLE) {
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for rent");
         }
         RentInfo newRent = new RentInfo();
-        newRent.setVehicles((List<Vehicle>) vehicle.get());
-        newRent.setUser(user.get());
+        newRent.setVehicle(vehicle.get());
+        newRent.setCustomer(user.get());
         newRent.setStartDate(startDate);
         newRent.setEndDate(endDate);
         // il costo giornaliero deve essere implementato con una logica simile
@@ -251,18 +289,71 @@ public class AdminServices {
         newRent.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
         newRent.setIsPaid(false);
         try {
-            rentRepository.save(newRent);
+
             vehicle.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
             vehicleRepository.save(vehicle.get());
-            return newRent;
+            return ResponseEntity.ok(rentRepository.save(newRent));
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create rent ");
         }
     }
 
-    private Double calculateTotalCost(OffsetDateTime startDate, OffsetDateTime endDate, Double dailyCost) {
-        // TODO implementare logica per costo totale noleggio
-        throw new UnsupportedOperationException("Unimplemented method 'calculateTotalCost'");
+    // calcolo totale del noleggio
+    private Double calculateTotalCost(String startDate, String endDate, Double dailyCost) {
+        OffsetDateTime rentStartDate = OffsetDateTime.parse(startDate);
+        OffsetDateTime rentEndDate = OffsetDateTime.parse(endDate);
+
+        Duration duration = Duration.between(rentStartDate, rentEndDate);
+        long rentalDays = duration.toDays();
+
+        double totalCost = rentalDays * dailyCost;
+        return totalCost;
     }
 
+    // eliminazione di un noleggio per un cliente tramite id
+    // ok
+    public boolean deleteRent(Long id) {
+        if (rentRepository.existsById(id)) {
+            rentRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    // modifica di un noleggio
+    // ok
+    public ResponseEntity<Object> modifyRentById(Long id, String choice, RentInfo rent) {
+        Optional<RentInfo> optionalRent = rentRepository.findById(id);
+        if (optionalRent.isPresent()) {
+            switch (choice) {
+                case "dailyCost":
+                    optionalRent.get().setDailyCost(rent.getDailyCost());
+                    break;
+                case "startDate":
+                    optionalRent.get().setStartDate(rent.getStartDate());
+                    break;
+                case "endDate":
+                    optionalRent.get().setEndDate(rent.getEndDate());
+                    break;
+                case "all":
+                    modifyAllPartOfRent(id, choice, rent, optionalRent);
+                    break;
+                default:
+
+                    break;
+            }
+            return ResponseEntity.ok(rentRepository.saveAndFlush(optionalRent.get()));
+        }
+        return null;
+    }
+
+    // modifica di tutti i parametri di un noleggio
+    private Optional<RentInfo> modifyAllPartOfRent(Long id, String choice, RentInfo rent,
+            Optional<RentInfo> optionalRent) {
+        Optional<RentInfo> modifyRent = optionalRent;
+        optionalRent.get().setDailyCost(rent.getDailyCost());
+        optionalRent.get().setStartDate(rent.getStartDate());
+        optionalRent.get().setEndDate(rent.getEndDate());
+        return modifyRent;
+    }
 }

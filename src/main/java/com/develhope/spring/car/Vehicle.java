@@ -1,5 +1,6 @@
 package com.develhope.spring.car;
 
+import com.develhope.spring.user.Users;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,13 +42,6 @@ public class Vehicle {
     private VehicleStatus isAvailable; // Flag che identifica se il veicolo è ordinabile, acquistabile o non più
                                        // disponibile
 
-    /*
-     * @OneToMany(mappedBy = "rentedVehicle")
-     * private List<RentInfo> rentInfos;
-     * 
-     * @OneToMany(mappedBy = "orderedVehicle")
-     * private List<OrderInfo> orderInfos;
-     */
 }
 
 /*
