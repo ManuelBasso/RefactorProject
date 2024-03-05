@@ -6,6 +6,7 @@ import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
+import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
 
@@ -85,52 +86,87 @@ public class CustomerService {
         }
     }
 
-
-    public OrderInfo createOrder(long idCustomer, long idVehicle, long idSeller, OrderInfo orderInfo) {
-        boolean customerCheck = false;
-        boolean sellerCheck = false;
-        boolean vehicleCheck=false;
-
-        Optional<Users> customer = userRepository.findById(idCustomer);
-        if (customer.isPresent()) {
-            for (Role role : customer.get().getRole()) {
-                if (role.getName().equals(ROLE_CUSTOMER)) {
-                    customerCheck = true;
-                    break;
-                }
+    public boolean checkRoleUser(Users user, Role.RoleType roleUser) {
+        boolean check = false;
+        for (Role role : user.getRole()) {
+            if (role.getName().equals(roleUser)) {
+                check = true;
+                break;
             }
         }
+        return check;
+    }
 
+    public OrderInfo createOrder(long idCustomer, long idSeller, long idVehicle, OrderInfo orderInfo) {
+        boolean customerCheck = false;
+        boolean sellerCheck = false;
+        Optional<Users> customer = userRepository.findById(idCustomer);
+        if (customer.isPresent()) {
+            customerCheck = checkRoleUser(customer.get(), ROLE_CUSTOMER);
+        }
+
+        boolean vehicleCheck = false;
         Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
         if (vehicle.isPresent() && vehicle.get().getIsAvailable().equals(VehicleStatus.AVAILABLE)) {
             vehicleCheck = true;
         }
 
+        Optional<Users> seller = userRepository.findById(idSeller);
+        if (seller.isPresent()) {
+            sellerCheck = checkRoleUser(seller.get(), ROLE_SELLER);
+        }
+
+        if (vehicleCheck && sellerCheck && customerCheck) {
+            OrderInfo newOrder = new OrderInfo();
+            newOrder.setOrderStatus(OrderStatus.ORDERED);
+            newOrder.setAdvancePayment(orderInfo.getAdvancePayment());
+            newOrder.setPaidInFull(orderInfo.getPaidInFull());
+            newOrder.setCustomer(customer.get());
+            newOrder.setVehicle(vehicle.get());
+            newOrder.setSeller(seller.get());
+            orderRepository.save(newOrder);
+            return newOrder;
+        } else {
+            return null;
+        }
+
+    }
+
+
+    public RentInfo createRent(long idCustomer,long idSeller, long idVehicle,  RentInfo rentInfo) {
+        boolean customerCheck = false;
+        boolean sellerCheck = false;
+        Optional<Users> customer = userRepository.findById(idCustomer);
+        if (customer.isPresent()) {
+            customerCheck = checkRoleUser(customer.get(), ROLE_CUSTOMER);
+        }
+
+        boolean vehicleCheck = false;
+        Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
+        if (vehicle.isPresent() && vehicle.get().getIsAvailable().equals(VehicleStatus.AVAILABLE)) {
+            vehicleCheck = true;
+        }
 
         Optional<Users> seller = userRepository.findById(idSeller);
         if (seller.isPresent()) {
-            for (Role role : seller.get().getRole()) {
-                if (role.getName().equals(ROLE_SELLER)) {
-                    sellerCheck = true;
-                    break;
-                }
-            }
+            sellerCheck = checkRoleUser(seller.get(), ROLE_SELLER);
         }
 
-            if (vehicleCheck  && sellerCheck && customerCheck) {
-                OrderInfo newOrder = new OrderInfo();
-                newOrder.setOrderStatus(orderInfo.getOrderStatus());
-                newOrder.setAdvancePayment(orderInfo.getAdvancePayment());
-                newOrder.setPaidInFull(orderInfo.getPaidInFull());
-                newOrder.setCustomer(customer.get());
-                newOrder.setVehicle(vehicle.get());
-                newOrder.setSeller(seller.get());
-                orderRepository.save(newOrder);
-                return newOrder;
-            } else {
-                return null;
-            }
-
+        if (vehicleCheck && sellerCheck && customerCheck) {
+            RentInfo newRent = new RentInfo();
+            newRent.setCustomer(customer.get());
+            newRent.setSeller(seller.get());
+            newRent.setVehicle(vehicle.get());
+            newRent.setStartDate(rentInfo.getStartDate());
+            newRent.setEndDate(rentInfo.getEndDate());
+            newRent.setIsPaid(rentInfo.getIsPaid());
+            newRent.setDailyCost(rentInfo.getDailyCost());
+            newRent.setTotalCost(rentInfo.getTotalCost());
+            rentRepository.saveAndFlush(newRent);
+            return newRent;
+        } else {
+            return null;
         }
     }
+}
 

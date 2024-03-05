@@ -2,6 +2,7 @@ package com.develhope.spring.user.customer;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.user.Users;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,9 +23,12 @@ public class CustomerController {
     //Creare un ordine a partire da un veicolo contrassegnato come ordinabile
     //ok
     @PostMapping("/{idCustomer}/createOrder/{idSeller}/{idVehicle}")
-    public OrderInfo createOrder(@PathVariable long idCustomer, @PathVariable long idVehicle, @PathVariable long idSeller, @RequestBody OrderInfo orderInfo) {
-        return customerService.createOrder(idCustomer, idVehicle, idSeller, orderInfo);
+    public OrderInfo createOrder(@PathVariable long idCustomer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody OrderInfo orderInfo) {
+        return customerService.createOrder(idCustomer, idSeller, idVehicle, orderInfo);
     }
+
+    //Creare un acquisto a partire da un veicolo contrassegnato come acquistabile
+
 
     //Vedere i propri ordini
     //okkk
@@ -46,6 +50,12 @@ public class CustomerController {
     @DeleteMapping("/{idOrder}/deleteOrder")
     public boolean deleteOrder(@PathVariable long idOrder) {
         return customerService.deleteOrder(idOrder);
+    }
+
+    //Creare un noleggio
+    @PostMapping("/{idCustomer}/creatRent/{idSeller}/{idVehicle}")
+    public RentInfo createORent(@PathVariable long idCustomer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody RentInfo rentInfo) {
+        return customerService.createRent(idCustomer, idSeller, idVehicle, rentInfo);
     }
 
     //Cancellare un noleggio
