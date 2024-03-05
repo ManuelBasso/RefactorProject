@@ -53,7 +53,7 @@ public class CustomerController {
     }
 
     //Creare un noleggio
-    @PostMapping("/{idCustomer}/creatRent/{idSeller}/{idVehicle}")
+    @PostMapping("/{idCustomer}/createRent/{idSeller}/{idVehicle}")
     public RentInfo createORent(@PathVariable long idCustomer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody RentInfo rentInfo) {
         return customerService.createRent(idCustomer, idSeller, idVehicle, rentInfo);
     }

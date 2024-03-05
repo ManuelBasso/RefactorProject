@@ -14,6 +14,7 @@ import com.develhope.spring.role.Role;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Iterator;
@@ -86,24 +87,13 @@ public class CustomerService {
         }
     }
 
-    public boolean checkRoleUser(Users user, Role.RoleType roleUser) {
-        boolean check = false;
-        for (Role role : user.getRole()) {
-            if (role.getName().equals(roleUser)) {
-                check = true;
-                break;
-            }
-        }
-        return check;
-    }
+
 
     public OrderInfo createOrder(long idCustomer, long idSeller, long idVehicle, OrderInfo orderInfo) {
-        boolean customerCheck = false;
-        boolean sellerCheck = false;
+
         Optional<Users> customer = userRepository.findById(idCustomer);
-        if (customer.isPresent()) {
-            customerCheck = checkRoleUser(customer.get(), ROLE_CUSTOMER);
-        }
+        boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
+
 
         boolean vehicleCheck = false;
         Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
@@ -112,9 +102,7 @@ public class CustomerService {
         }
 
         Optional<Users> seller = userRepository.findById(idSeller);
-        if (seller.isPresent()) {
-            sellerCheck = checkRoleUser(seller.get(), ROLE_SELLER);
-        }
+        boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
 
         if (vehicleCheck && sellerCheck && customerCheck) {
             OrderInfo newOrder = new OrderInfo();
@@ -133,13 +121,12 @@ public class CustomerService {
     }
 
 
-    public RentInfo createRent(long idCustomer,long idSeller, long idVehicle,  RentInfo rentInfo) {
-        boolean customerCheck = false;
-        boolean sellerCheck = false;
+    public RentInfo createRent(long idCustomer, long idSeller, long idVehicle, RentInfo rentInfo) {
+
+
         Optional<Users> customer = userRepository.findById(idCustomer);
-        if (customer.isPresent()) {
-            customerCheck = checkRoleUser(customer.get(), ROLE_CUSTOMER);
-        }
+        boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
+
 
         boolean vehicleCheck = false;
         Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
@@ -148,9 +135,8 @@ public class CustomerService {
         }
 
         Optional<Users> seller = userRepository.findById(idSeller);
-        if (seller.isPresent()) {
-            sellerCheck = checkRoleUser(seller.get(), ROLE_SELLER);
-        }
+        boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
+
 
         if (vehicleCheck && sellerCheck && customerCheck) {
             RentInfo newRent = new RentInfo();
@@ -167,6 +153,20 @@ public class CustomerService {
         } else {
             return null;
         }
+    }
+
+
+    public boolean checkRoleUser(Optional<Users> user, Role.RoleType roleUser) {
+        boolean check = false;
+        if (user.isPresent()) {
+            for (Role role : user.get().getRole()) {
+                if (role.getName().equals(roleUser)) {
+                    check = true;
+                    break;
+                }
+            }
+        }
+        return check;
     }
 }
 
