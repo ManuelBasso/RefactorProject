@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.purchase.PurchaseInfo;
 import com.develhope.spring.rent.RentInfo;
 
 import org.springframework.web.bind.annotation.RequestParam;
@@ -131,4 +132,29 @@ public class AdminController {
             @RequestParam String choice, @RequestBody RentInfo rent) {
         return adminServices.modifyRentById(id, choice, rent);
     }
+
+    // --------------- controller per operazioni sugli acquisti -------------
+
+    @GetMapping("/admin/getAllPurchase")
+    public ResponseEntity<Object> getPurchase() {
+        return adminServices.getPurchase();
+    }
+
+    @PostMapping("/admin/{id}/createPurchaseForAUser")
+    public ResponseEntity<Object> createPurchaseForUser(@PathVariable Long id, @RequestParam Long vehicle_Id) {
+        return adminServices.createPurchaseForAUser(id, vehicle_Id);
+    }
+
+    @DeleteMapping("/admin/{id}/deletePurchaseById")
+    public boolean deletePurchaseById(@PathVariable Long id) {
+        return adminServices.deletePurchase(id);
+    }
+    // devo chiedere ad antonio cosa devo modificare in un acquisto
+
+    // @PutMapping("/admin/{id}/modifyPurchase")
+    // public ResponseEntity<Object> modifyPurchaseById(@PathVariable Long id,
+    // @RequestParam Long userId,
+    // @RequestParam String choice, @RequestBody PurchaseInfo purchase) {
+    // return adminServices.modifyPurchaseById(id, userId, choice, purchase);
+    // }
 }

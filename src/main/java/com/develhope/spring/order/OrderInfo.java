@@ -1,8 +1,8 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.purchase.PurchaseInfo;
 import com.develhope.spring.user.Users;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
