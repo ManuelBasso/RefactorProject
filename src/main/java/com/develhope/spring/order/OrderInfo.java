@@ -31,7 +31,7 @@ public class OrderInfo {
     @JoinColumn(name = "seller_id")
     private Users seller;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 
