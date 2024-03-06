@@ -1,8 +1,8 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.purchase.PurchaseInfo;
 import com.develhope.spring.user.Users;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,7 +31,7 @@ public class OrderInfo {
     @JoinColumn(name = "seller_id")
     private Users seller;
 
-    @ManyToOne(cascade = CascadeType.REMOVE)
+    @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
 

@@ -17,6 +17,8 @@ import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
+import com.develhope.spring.purchase.PurchaseInfo;
+import com.develhope.spring.purchase.PurchaseRepository;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentRepository;
 import com.develhope.spring.user.Users;
@@ -36,6 +38,9 @@ public class AdminServices {
 
     @Autowired
     RentRepository rentRepository;
+
+    @Autowired
+    PurchaseRepository purchaseRepository;
 
     // --------------- logica dei controller per operazioni sui ordini -------------
 
@@ -356,4 +361,93 @@ public class AdminServices {
         optionalRent.get().setEndDate(rent.getEndDate());
         return modifyRent;
     }
+
+    // --------------- logica dei controller per operazioni sugli acquisti
+    // -------------
+
+    // ottieni tutti gli acquisti
+    public ResponseEntity<Object> getPurchase() {
+        return ResponseEntity.ok(purchaseRepository.findAll());
+    }
+
+    // crea un acquisto per un utente
+    public ResponseEntity<Object> createPurchaseForAUser(Long id, Long vehicle_Id) {
+        Optional<Users> user = userRepository.findById(id);
+        Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_Id);
+        if (!user.isPresent() || !vehicle.isPresent()) {
+            throw new OrderRentCreationException("Invalid user or vehicle ID");
+        }
+        if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE
+                && vehicle.get().getIsAvailable() != VehicleStatus.ORDERED) {
+            throw new OrderRentCreationException("Vehicle is not available for purchase or is already bought");
+        }
+
+        Optional<OrderInfo> order = orderRepository.findByVehicleAndOrderStatus(vehicle.get(),
+                OrderStatus.COMPLETED);
+        if (order.isPresent() && order.get().getCustomer().equals(user.get())) {
+            return ResponseEntity.ok(purchaseIfOrderExist(vehicle, order));
+        } else {
+            return ResponseEntity.ok(purchaseWithoutOrder(user, vehicle));
+        }
+
+    }
+
+    private Object purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle) {
+        PurchaseInfo newPurchase2 = new PurchaseInfo();
+        newPurchase2.setCustomer(user.get());
+        newPurchase2.setVehicle(vehicle.get());
+        newPurchase2.setTotalPrice(vehicle.get().getPrice());
+        try {
+            vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
+            vehicleRepository.save(vehicle.get());
+            return ResponseEntity.ok(purchaseRepository.save(newPurchase2));
+        } catch (Exception e) {
+            throw new OrderRentCreationException("Failed to create purchase ");
+        }
+    }
+
+    public PurchaseInfo purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<OrderInfo> order) {
+        PurchaseInfo newPurchase = new PurchaseInfo();
+        newPurchase.setCustomer(order.get().getCustomer());
+        newPurchase.setVehicle(order.get().getVehicle());
+        newPurchase.setTotalPrice(vehicle.get().getPrice() - order.get().getAdvancePayment());
+        newPurchase.setOrder(order.get());
+        try {
+            vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
+            vehicleRepository.save(vehicle.get());
+            return purchaseRepository.save(newPurchase);
+        } catch (Exception e) {
+            throw new OrderRentCreationException("Failed to create purchase with order");
+        }
+    }
+
+    // elimina un acquisto per un utente
+    public boolean deletePurchase(Long id) {
+        if (purchaseRepository.existsById(id)) {
+            purchaseRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    // modifica un acquisto per un utente
+    // public ResponseEntity<Object> modifyPurchaseById(Long id, Long userId, String
+    // choice, PurchaseInfo purchase) {
+    // switch (choice) {
+    // case "totalPrice":
+
+    // break;
+    // case "customer":
+
+    // break;
+
+    // case "vehicle":
+
+    // break;
+
+    // default:
+    // break;
+    // }
+    // }
+
 }
