@@ -32,6 +32,10 @@ public class RentInfo {
         @JoinColumn(name = "customer_id")
         private Users customer;
 
+        @ManyToOne
+        @JoinColumn(name = "seller_id")
+        private Users seller;
+
         // TODO totalCost should be calculated by the program, not the user
 
         /*
