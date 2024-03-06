@@ -261,6 +261,11 @@ public class AdminServices {
     // --------------- logica dei controller per operazioni sui noleggi
     // -------------
 
+    // ottenere tutti i noleggi
+    public ResponseEntity<Object> getallRent() {
+        return ResponseEntity.ok(rentRepository.findAll());
+    }
+
     // creazione noleggio per un utente tramite id
     public ResponseEntity<Object> createRentForAUser(Long user_id, Long vehicle_id, String startDate, String endDate,
             Double dailyCost) throws OrderRentCreationException {
@@ -305,4 +310,50 @@ public class AdminServices {
         return totalCost;
     }
 
+    // eliminazione di un noleggio per un cliente tramite id
+    // ok
+    public boolean deleteRent(Long id) {
+        if (rentRepository.existsById(id)) {
+            rentRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    // modifica di un noleggio
+    // ok
+    public ResponseEntity<Object> modifyRentById(Long id, String choice, RentInfo rent) {
+        Optional<RentInfo> optionalRent = rentRepository.findById(id);
+        if (optionalRent.isPresent()) {
+            switch (choice) {
+                case "dailyCost":
+                    optionalRent.get().setDailyCost(rent.getDailyCost());
+                    break;
+                case "startDate":
+                    optionalRent.get().setStartDate(rent.getStartDate());
+                    break;
+                case "endDate":
+                    optionalRent.get().setEndDate(rent.getEndDate());
+                    break;
+                case "all":
+                    modifyAllPartOfRent(id, choice, rent, optionalRent);
+                    break;
+                default:
+
+                    break;
+            }
+            return ResponseEntity.ok(rentRepository.saveAndFlush(optionalRent.get()));
+        }
+        return null;
+    }
+
+    // modifica di tutti i parametri di un noleggio
+    private Optional<RentInfo> modifyAllPartOfRent(Long id, String choice, RentInfo rent,
+            Optional<RentInfo> optionalRent) {
+        Optional<RentInfo> modifyRent = optionalRent;
+        optionalRent.get().setDailyCost(rent.getDailyCost());
+        optionalRent.get().setStartDate(rent.getStartDate());
+        optionalRent.get().setEndDate(rent.getEndDate());
+        return modifyRent;
+    }
 }

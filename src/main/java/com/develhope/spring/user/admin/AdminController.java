@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.rent.RentInfo;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -101,11 +102,33 @@ public class AdminController {
 
     // --------------- controller per operazioni sui noleggi -------------
 
+    // ottenere tutti gli noleggio
+    // funziona
+    @GetMapping("/admin/getAllRent")
+    public ResponseEntity<Object> getRent() {
+        return adminServices.getallRent();
+    }
+
     // creazione nuovo noleggio per un utente specifico
     @PostMapping("/admin/{id}/createRentForAUser")
     public ResponseEntity<Object> creatRentForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
             @RequestParam String startDate,
             @RequestParam String endDate, @RequestParam Double dailyCost) {
         return adminServices.createRentForAUser(id, vehicle_Id, startDate, endDate, dailyCost);
+    }
+
+    // eliminazione di un noleggio per un cliente tramite id
+    // funziona ma prima bisogna svuotare i parametri del noleggio in questione
+    // come la delete del veicolo
+    @DeleteMapping("/admin/{id}/deleteRentById")
+    public boolean deleteRentById(@PathVariable Long id) {
+        return adminServices.deleteRent(id);
+    }
+
+    // modifica di un noleggio
+    @PutMapping("/admin/{id}/modifyRent")
+    public ResponseEntity<Object> modifyRentById(@PathVariable Long id,
+            @RequestParam String choice, @RequestBody RentInfo rent) {
+        return adminServices.modifyRentById(id, choice, rent);
     }
 }
