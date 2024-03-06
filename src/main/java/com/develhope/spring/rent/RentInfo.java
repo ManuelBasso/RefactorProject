@@ -26,7 +26,7 @@ public class RentInfo {
         private Double totalCost; // Costo totale noleggio
         private Boolean isPaid; // Flag pagato
 
-        @ManyToOne(cascade = CascadeType.REMOVE)
+        @ManyToOne
         @JoinColumn(name = "vehicle_id")
         private Vehicle vehicle;
 
