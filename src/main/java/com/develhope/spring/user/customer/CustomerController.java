@@ -6,7 +6,9 @@ import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.user.Users;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,9 +24,9 @@ public class CustomerController {
 
     //Creare un ordine a partire da un veicolo contrassegnato come ordinabile
     //ok
-    @PostMapping("/{idCustomer}/createOrder/{idSeller}/{idVehicle}")
-    public OrderInfo createOrder(@PathVariable long idCustomer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody OrderInfo orderInfo) {
-        return customerService.createOrder(idCustomer, idSeller, idVehicle, orderInfo);
+    @PostMapping("/createOrder/{idSeller}/{idVehicle}")
+    public ResponseEntity<?> createOrder(@AuthenticationPrincipal Users user, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody OrderInfo orderInfo) {
+        return customerService.createOrder(user, idSeller, idVehicle, orderInfo);
     }
 
     //Creare un acquisto a partire da un veicolo contrassegnato come acquistabile
@@ -53,9 +55,9 @@ public class CustomerController {
     }
 
     //Creare un noleggio
-    @PostMapping("/{idCustomer}/createRent/{idSeller}/{idVehicle}")
-    public RentInfo createORent(@PathVariable long idCustomer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody RentInfo rentInfo) {
-        return customerService.createRent(idCustomer, idSeller, idVehicle, rentInfo);
+    @PostMapping("/createRent/{idSeller}/{idVehicle}")
+    public ResponseEntity<?> createRent(@AuthenticationPrincipal Users customer, @PathVariable long idSeller, @PathVariable long idVehicle, @RequestBody RentInfo rentInfo) {
+        return customerService.createRent(customer, idSeller, idVehicle, rentInfo);
     }
 
     //Cancellare un noleggio
