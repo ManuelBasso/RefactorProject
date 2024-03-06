@@ -17,7 +17,11 @@ public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
     // Da testare
     List<OrderInfo> findByCustomer_Id(long userId);
 
+
     Optional<OrderInfo> findByVehicleAndOrderStatus(Vehicle vehicle, OrderStatus completed);
+
+    void deleteByCustomer_Id(Long userId);
+
 
     /*
      * @Query(value = "SELECT ORDERSTATUS FROM ORDERS o WHERE o. ")
