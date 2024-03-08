@@ -5,11 +5,15 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
+import com.develhope.spring.car.cardto.VehicleRequest;
+import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.order.OrderInfo;
 
 import com.develhope.spring.rent.RentInfo;
 
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,16 +36,16 @@ public class AdminController {
 
     // vedere quali veicolo esistono , accessibile a tutti i tipi di utente
     // funziona
-    @GetMapping("/public/gettAllVehicle")
-    public ResponseEntity<Object> getVehicle() {
+    @GetMapping("/admin/gettAllVehicle")
+    public ResponseEntity<List<VehicleResponse>> getVehicle() {
         return adminServices.getVehicle();
     }
 
     // creazione nuovo veicolo
     // funziona
     @PostMapping("/admin/addVehicle")
-    public ResponseEntity<Object> addAVehicle(@RequestBody Vehicle newVehicle) {
-        return adminServices.addVehicle(newVehicle);
+    public ResponseEntity<VehicleResponse> addAVehicle(@RequestBody VehicleRequest newVehicleRequest) {
+        return adminServices.addVehicle(newVehicleRequest);
     }
 
     // modifica dei parametri di un veicolo

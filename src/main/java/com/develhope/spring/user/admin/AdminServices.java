@@ -2,7 +2,8 @@ package com.develhope.spring.user.admin;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
-
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.VehicleModel;
 import com.develhope.spring.car.VehicleRepository;
 import com.develhope.spring.car.VehicleStatus;
-
+import com.develhope.spring.car.cardto.VehicleRequest;
+import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
@@ -46,29 +49,24 @@ public class AdminServices {
 
     // tutti i veicoli
     // ok
-    public ResponseEntity<Object> getVehicle() {
-        return ResponseEntity.ok(vehicleRepository.findAll());
+    public ResponseEntity<List<VehicleResponse>> getVehicle() {
+        List<Vehicle> response = vehicleRepository.findAll();
+        List<VehicleResponse> result = new ArrayList<>();
+        for (Vehicle vehicle : response) {
+            VehicleModel vehicleModel = VehicleModel.mapEntityToModel(vehicle);
+            result.add(VehicleModel.mapModelToResponse(vehicleModel));
+        }
+        return ResponseEntity.ok(result);
     }
 
     // aggiunzione di un veicolo
     // ok
-    public ResponseEntity<Object> addVehicle(Vehicle newVehicle) {
-        Vehicle addVehicle = new Vehicle();
-        addVehicle.setAccessories(newVehicle.getAccessories());
-        addVehicle.setBrand(newVehicle.getBrand());
-        addVehicle.setColor(newVehicle.getColor());
-        addVehicle.setDiscount(newVehicle.getDiscount());
-        addVehicle.setDisplacement(newVehicle.getDisplacement());
-        addVehicle.setFuelType(newVehicle.getFuelType());
-        addVehicle.setGearboxType(newVehicle.getGearboxType());
-        addVehicle.setIsAvailable(newVehicle.getIsAvailable());
-        addVehicle.setIsNew(newVehicle.getIsNew());
-        addVehicle.setModel(newVehicle.getModel());
-        addVehicle.setPower(newVehicle.getPower());
-        addVehicle.setPrice(newVehicle.getPrice());
-        addVehicle.setYearOfRegistration(newVehicle.getYearOfRegistration());
-
-        return ResponseEntity.ok(vehicleRepository.save(addVehicle));
+    public ResponseEntity<VehicleResponse> addVehicle(VehicleRequest newVehicleRequest) {
+        VehicleModel vehicleRequestModel = VehicleModel.mapRequestToModel(newVehicleRequest);
+        Vehicle vehicleRequestEntity = VehicleModel.mapModelToEntity(vehicleRequestModel);
+        Vehicle savedVehicle = vehicleRepository.saveAndFlush(vehicleRequestEntity);
+        VehicleModel vehicleResponseModel = VehicleModel.mapEntityToModel(savedVehicle);
+        return ResponseEntity.ok(VehicleModel.mapModelToResponse(vehicleResponseModel));
     }
 
     // metodo per la modifica di un solo parametro del veicolo
