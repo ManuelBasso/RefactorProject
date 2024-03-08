@@ -45,7 +45,6 @@ public class Vehicle {
     private VehicleStatus isAvailable; // Flag che identifica se il veicolo è ordinabile, acquistabile o non più
                                        // disponibile
 
-
 }
 
 /*
