@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.purchase.PurchaseInfo;
+
 import com.develhope.spring.rent.RentInfo;
 
 import org.springframework.web.bind.annotation.RequestParam;
