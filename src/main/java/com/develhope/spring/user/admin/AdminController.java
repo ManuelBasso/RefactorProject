@@ -51,9 +51,9 @@ public class AdminController {
     // modifica dei parametri di un veicolo
     // funziona
     @PutMapping("/admin/{id}/modifyAVehicle")
-    public ResponseEntity<Object> modifVehicleById(@PathVariable Long id, @RequestParam String choice,
-            @RequestBody Vehicle vehicle) {
-        return adminServices.modifyVehicle(id, choice, vehicle);
+    public ResponseEntity<VehicleResponse> modifVehicleById(@PathVariable Long id, @RequestParam String choice,
+            @RequestBody VehicleRequest vehicleRequest) {
+        return adminServices.modifyVehicle(id, choice, vehicleRequest);
     }
 
     // eliminazione veicolo tramite id
