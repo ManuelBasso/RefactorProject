@@ -71,76 +71,77 @@ public class AdminServices {
 
     // metodo per la modifica di un solo parametro del veicolo
     // ok
-    public ResponseEntity<Object> modifyVehicle(Long id, String choice, Vehicle vehicle) {
+    public ResponseEntity<VehicleResponse> modifyVehicle(Long id, String choice, VehicleRequest vehicleRequest) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
+            Vehicle vehicleRequestEntity = optionalVehicle.get();
             switch (choice) {
                 case "brand":
-                    optionalVehicle.get().setBrand(vehicle.getBrand());
+                    vehicleRequestEntity.setBrand(vehicleRequest.getBrand());
                     break;
                 case "model":
-                    optionalVehicle.get().setModel(vehicle.getModel());
+                    vehicleRequestEntity.setModel(vehicleRequest.getModel());
                     break;
                 case "color":
-                    optionalVehicle.get().setColor(vehicle.getColor());
+                    vehicleRequestEntity.setColor(vehicleRequest.getColor());
                     break;
                 case "gear":
-                    optionalVehicle.get().setGearboxType(vehicle.getGearboxType());
+                    vehicleRequestEntity.setGearboxType(vehicleRequest.getGearboxType());
                     break;
                 case "fuel":
-                    optionalVehicle.get().setFuelType(vehicle.getFuelType());
+                    vehicleRequestEntity.setFuelType(vehicleRequest.getFuelType());
                     break;
                 case "accessories":
-                    optionalVehicle.get().setAccessories(vehicle.getAccessories());
+                    vehicleRequestEntity.setAccessories(vehicleRequest.getAccessories());
                     break;
                 case "displacement":
-                    optionalVehicle.get().setDisplacement(vehicle.getDisplacement());
+                    vehicleRequestEntity.setDisplacement(vehicleRequest.getDisplacement());
                     break;
                 case "power":
-                    optionalVehicle.get().setPower(vehicle.getPower());
+                    vehicleRequestEntity.setPower(vehicleRequest.getPower());
                     break;
                 case "year_registration":
-                    optionalVehicle.get().setYearOfRegistration(vehicle.getYearOfRegistration());
+                    vehicleRequestEntity.setYearOfRegistration(vehicleRequest.getYearOfRegistration());
                     break;
                 case "price":
-                    optionalVehicle.get().setPrice(vehicle.getPrice());
+                    vehicleRequestEntity.setPrice(vehicleRequest.getPrice());
                     break;
                 case "discount":
-                    optionalVehicle.get().setDiscount(vehicle.getDiscount());
+                    vehicleRequestEntity.setDiscount(vehicleRequest.getDiscount());
                     break;
                 case "new/used":
-                    optionalVehicle.get().setIsNew(vehicle.getIsNew());
+                    vehicleRequestEntity.setIsNew(vehicleRequest.getIsNew());
                     break;
                 case "all":
-                    modifyAllPartOfVehicle(id, choice, vehicle, optionalVehicle);
+                    modifyAllPartOfVehicle(vehicleRequestEntity, vehicleRequest);
                     break;
                 default:
 
                     break;
             }
-            return ResponseEntity.ok(vehicleRepository.saveAndFlush(optionalVehicle.get()));
+            Vehicle modifiedVehicle = vehicleRepository.saveAndFlush(vehicleRequestEntity);
+            VehicleModel modifiedVehicleModel = VehicleModel.mapEntityToModel(modifiedVehicle);
+            VehicleResponse vehicleResponse = VehicleModel.mapModelToResponse(modifiedVehicleModel);
+            return ResponseEntity.ok(vehicleResponse);
         }
         return null;
     }
 
     // metodo per la modifica di tutti i parametri del veicolo
     // ok
-    public Optional<Vehicle> modifyAllPartOfVehicle(Long id, String choice, Vehicle vehicle,
-            Optional<Vehicle> optionalVehicle) {
-        Optional<Vehicle> modifyOptionaVehicle = optionalVehicle;
-        modifyOptionaVehicle.get().setBrand(vehicle.getBrand());
-        modifyOptionaVehicle.get().setModel(vehicle.getModel());
-        modifyOptionaVehicle.get().setColor(vehicle.getColor());
-        modifyOptionaVehicle.get().setGearboxType(vehicle.getGearboxType());
-        modifyOptionaVehicle.get().setFuelType(vehicle.getFuelType());
-        modifyOptionaVehicle.get().setAccessories(vehicle.getAccessories());
-        modifyOptionaVehicle.get().setDisplacement(vehicle.getDisplacement());
-        modifyOptionaVehicle.get().setPower(vehicle.getPower());
-        modifyOptionaVehicle.get().setYearOfRegistration(vehicle.getYearOfRegistration());
-        modifyOptionaVehicle.get().setPrice(vehicle.getPrice());
-        modifyOptionaVehicle.get().setDiscount(vehicle.getDiscount());
-        modifyOptionaVehicle.get().setIsNew(vehicle.getIsNew());
-        return modifyOptionaVehicle;
+    private void modifyAllPartOfVehicle(Vehicle vehicleRequestEntity, VehicleRequest vehicleRequest) {
+        vehicleRequestEntity.setBrand(vehicleRequest.getBrand());
+        vehicleRequestEntity.setModel(vehicleRequest.getModel());
+        vehicleRequestEntity.setColor(vehicleRequest.getColor());
+        vehicleRequestEntity.setGearboxType(vehicleRequest.getGearboxType());
+        vehicleRequestEntity.setFuelType(vehicleRequest.getFuelType());
+        vehicleRequestEntity.setAccessories(vehicleRequest.getAccessories());
+        vehicleRequestEntity.setDisplacement(vehicleRequest.getDisplacement());
+        vehicleRequestEntity.setPower(vehicleRequest.getPower());
+        vehicleRequestEntity.setYearOfRegistration(vehicleRequest.getYearOfRegistration());
+        vehicleRequestEntity.setPrice(vehicleRequest.getPrice());
+        vehicleRequestEntity.setDiscount(vehicleRequest.getDiscount());
+        vehicleRequestEntity.setIsNew(vehicleRequest.getIsNew());
     }
 
     // eliminazione di un veicolo
