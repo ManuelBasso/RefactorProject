@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -18,12 +19,19 @@ import com.develhope.spring.car.cardto.VehicleRequest;
 import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.configurations.exception.OrderRentCreationException;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.order.OrderModel;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
+import com.develhope.spring.order.orderdto.OrderRequest;
+import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.purchase.PurchaseInfo;
 import com.develhope.spring.purchase.PurchaseRepository;
 import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
+import com.develhope.spring.rent.rentdto.RentRequest;
+import com.develhope.spring.rent.rentdto.RentResponse;
+import com.develhope.spring.role.Role.RoleType;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
 
@@ -45,7 +53,8 @@ public class AdminServices {
     @Autowired
     PurchaseRepository purchaseRepository;
 
-    // --------------- logica dei controller per operazioni sui ordini -------------
+    // --------------- logica dei controller per operazioni sui veicoli
+    // -------------
 
     // tutti i veicoli
     // ok
@@ -124,7 +133,7 @@ public class AdminServices {
             VehicleResponse vehicleResponse = VehicleModel.mapModelToResponse(modifiedVehicleModel);
             return ResponseEntity.ok(vehicleResponse);
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     // metodo per la modifica di tutti i parametri del veicolo
@@ -146,37 +155,45 @@ public class AdminServices {
 
     // eliminazione di un veicolo
     // ok
-    public boolean deleteVehicle(Long id) {
+    public ResponseEntity<Void> deleteVehicle(Long id) {
         if (vehicleRepository.existsById(id)) {
             vehicleRepository.deleteById(id);
-            return true;
+            return ResponseEntity.noContent().build();
         }
-        return false;
+        return ResponseEntity.notFound().build();
     }
 
     // cambio dello Status di un veicolo
     // ok
-    public ResponseEntity<Object> changeStatusVehicle(Long id, VehicleStatus status) {
+    public ResponseEntity<VehicleResponse> changeStatusVehicle(Long id, VehicleStatus status) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle updatedVehicle = optionalVehicle.get();
             updatedVehicle.setIsAvailable(status);
-            return ResponseEntity.ok(vehicleRepository.saveAndFlush(updatedVehicle));
+            Vehicle modifiedVehicle = vehicleRepository.saveAndFlush(updatedVehicle);
+            VehicleModel updatedVehicleModel = VehicleModel.mapEntityToModel(modifiedVehicle);
+            return ResponseEntity.ok(VehicleModel.mapModelToResponse(updatedVehicleModel));
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     // --------------- logica dei controller per operazioni sui ordini -------------
 
     // ottenere tutti gli ordini
     // ok
-    public ResponseEntity<Object> getOrder() {
-        return ResponseEntity.ok(orderRepository.findAll());
+    public ResponseEntity<List<OrderResponse>> getOrder() {
+        List<OrderInfo> response = orderRepository.findAll();
+        List<OrderResponse> result = new ArrayList<>();
+        for (OrderInfo order : response) {
+            OrderModel orderModel = OrderModel.mapEntityToModel(order);
+            result.add(OrderModel.mapModelToResponse(orderModel));
+        }
+        return ResponseEntity.ok(result);
     }
 
     // creazione ordine per un utente tramite id
     // ok
-    public ResponseEntity<Object> createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+    public ResponseEntity<OrderResponse> createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
@@ -186,19 +203,24 @@ public class AdminServices {
         if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for order");
         }
-        OrderInfo newOrder = new OrderInfo();
-        newOrder.setVehicle(vehicle.get());
+        OrderRequest newOrderRequest = new OrderRequest();
+        newOrderRequest.setVehicle(vehicle.get());
         // se l'acquirente paga un anticipo si chiama il metodo getAdvancePaymentAmount
         // altrimenti si restituisce null
         // su advance payment
-        newOrder.setAdvancePayment(advance ? getAdvancePaymentAmount(vehicle_id) : null);
-        newOrder.setPaidInFull(false);
-        newOrder.setCustomer(user.get());
-        newOrder.setOrderStatus(OrderStatus.INCOMPLETE);
+        newOrderRequest.setAdvancePayment(advance ? getAdvancePaymentAmount(vehicle_id) : null);
+        newOrderRequest.setPaidInFull(false);
+        newOrderRequest.setCustomer(user.get());
+        newOrderRequest.setOrderStatus(OrderStatus.INCOMPLETE);
         try {
             vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
             vehicleRepository.save(vehicle.get());
-            return ResponseEntity.ok(orderRepository.save(newOrder));
+
+            OrderModel orderModel = OrderModel.mapRequestToModel(newOrderRequest);
+            OrderInfo orderInfo = orderRepository.save(OrderModel.mapModelToEntity(orderModel));
+            OrderResponse orderResponse = OrderModel.mapModelToResponse(OrderModel.mapEntityToModel(orderInfo));
+
+            return ResponseEntity.ok(orderResponse);
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create order");
         }
@@ -214,64 +236,108 @@ public class AdminServices {
 
     // eliminazione di un ordine per un cliente tramite id
     // ok
-    public boolean deleteOrder(Long id) {
-        if (orderRepository.existsById(id)) {
+    public ResponseEntity<Void> deleteOrder(Long id) {
+        Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
+        if (optionalOrder.isPresent()) {
+            OrderInfo order = optionalOrder.get();
+            Long vehicleId = order.getVehicle().getVehicleId();
             orderRepository.deleteById(id);
-            return true;
+
+            Optional<Vehicle> optionalVehicle = vehicleRepository.findById(vehicleId);
+            if (optionalVehicle.isPresent()) {
+                Vehicle vehicle = optionalVehicle.get();
+                vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
+                vehicleRepository.save(vehicle);
+            }
+            return ResponseEntity.noContent().build();
         }
-        return false;
+        return ResponseEntity.notFound().build();
     }
 
     // modifica di un ordine
     // ok
-    public ResponseEntity<Object> modifyOrderBy(Long id, String choice, OrderInfo order, Long userId) {
+    public ResponseEntity<OrderResponse> modifyOrderBy(Long id, String choice, OrderRequest orderRequest,
+            Long customerId, Long sellerId, Long vehicleId) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
+            OrderInfo orderRequestEntity = optionalOrder.get();
+
+            boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
+            boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
+            if (!isValidCustomer || !isValidSeller) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
             switch (choice) {
                 case "paidInFull":
-                    optionalOrder.get().setPaidInFull(order.getPaidInFull());
+                    orderRequestEntity.setPaidInFull(orderRequest.getPaidInFull());
                     break;
                 case "orderStatus":
-                    optionalOrder.get().setOrderStatus(order.getOrderStatus());
+                    orderRequestEntity.setOrderStatus(orderRequest.getOrderStatus());
                     break;
-                case "user":
-                    Users user = userRepository.getReferenceById(userId);
-                    optionalOrder.get().setCustomer(user);
+                case "AdvancePayment":
+                    orderRequestEntity.setAdvancePayment(orderRequest.getAdvancePayment());
+                    break;
+                case "Customer":
+                    Users customer = userRepository.getReferenceById(customerId);
+                    orderRequestEntity.setCustomer(customer);
+                    break;
+                case "Seller":
+                    Users seller = userRepository.getReferenceById(sellerId);
+                    orderRequestEntity.setSeller(seller);
+                    break;
+                case "Vehicle":
+                    Vehicle vehicle = vehicleRepository.getReferenceById(vehicleId);
+                    orderRequestEntity.setVehicle(vehicle);
                     break;
                 case "all":
-                    modifyAllPartOfOrder(id, choice, order, userId, optionalOrder);
+                    modifyAllPartOfOrder(orderRequestEntity, orderRequest);
                     break;
                 default:
 
                     break;
             }
-            return ResponseEntity.ok(orderRepository.saveAndFlush(optionalOrder.get()));
+            OrderInfo modifiedOrder = orderRepository.saveAndFlush(orderRequestEntity);
+            OrderModel modifiedOrderModel = OrderModel.mapEntityToModel(modifiedOrder);
+            OrderResponse orderResponse = OrderModel.mapModelToResponse(modifiedOrderModel);
+            return ResponseEntity.ok(orderResponse);
         }
-        return null;
+        return ResponseEntity.notFound().build();
+    }
+
+    private boolean checkUserRoles(Long userId, RoleType requiredRole) {
+        Optional<Users> user = userRepository.findById(userId);
+        return user.isPresent() && user.get().getRole().stream()
+                .anyMatch(role -> role.getName() == requiredRole);
     }
 
     // modifica di tutti i parametri un ordine
-    private Optional<OrderInfo> modifyAllPartOfOrder(Long id, String choice, OrderInfo order, Long userId,
-            Optional<OrderInfo> optionalOrder) {
-        Optional<OrderInfo> modifyOrder = optionalOrder;
-        optionalOrder.get().setPaidInFull(order.getPaidInFull());
-        optionalOrder.get().setOrderStatus(order.getOrderStatus());
-        Users user = userRepository.getReferenceById(userId);
-        optionalOrder.get().setCustomer(user);
-
-        return modifyOrder;
+    private void modifyAllPartOfOrder(OrderInfo orderRequestEntity, OrderRequest orderRequest) {
+        orderRequestEntity.setAdvancePayment(orderRequest.getAdvancePayment());
+        orderRequestEntity.setCustomer(orderRequest.getCustomer());
+        orderRequestEntity.setOrderStatus(orderRequest.getOrderStatus());
+        orderRequestEntity.setPaidInFull(orderRequest.getPaidInFull());
+        orderRequestEntity.setSeller(orderRequest.getSeller());
+        orderRequestEntity.setVehicle(orderRequest.getVehicle());
     }
 
     // --------------- logica dei controller per operazioni sui noleggi
     // -------------
 
     // ottenere tutti i noleggi
-    public ResponseEntity<Object> getallRent() {
-        return ResponseEntity.ok(rentRepository.findAll());
+    public ResponseEntity<List<RentResponse>> getallRent() {
+        List<RentInfo> response = rentRepository.findAll();
+        List<RentResponse> result = new ArrayList<>();
+        for (RentInfo order : response) {
+            RentModel orderModel = RentModel.mapEntityToModel(order);
+            result.add(RentModel.mapModelToResponse(orderModel));
+        }
+        return ResponseEntity.ok(result);
     }
 
     // creazione noleggio per un utente tramite id
-    public ResponseEntity<Object> createRentForAUser(Long user_id, Long vehicle_id, String startDate, String endDate,
+    public ResponseEntity<RentResponse> createRentForAUser(Long user_id, Long vehicle_id, String startDate,
+            String endDate,
             Double dailyCost) throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
@@ -281,22 +347,27 @@ public class AdminServices {
         if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for rent");
         }
-        RentInfo newRent = new RentInfo();
-        newRent.setVehicle(vehicle.get());
-        newRent.setCustomer(user.get());
-        newRent.setStartDate(startDate);
-        newRent.setEndDate(endDate);
+        RentRequest newRentRequest = new RentRequest();
+        newRentRequest.setVehicle(vehicle.get());
+        newRentRequest.setCustomer(user.get());
+        newRentRequest.setStartDate(startDate);
+        newRentRequest.setEndDate(endDate);
         // il costo giornaliero deve essere implementato con una logica simile
         // all'anticipo
         // quindi è da cambiare
-        newRent.setDailyCost(dailyCost);
-        newRent.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
-        newRent.setIsPaid(false);
+        newRentRequest.setDailyCost(dailyCost);
+        newRentRequest.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
+        newRentRequest.setIsPaid(false);
         try {
 
             vehicle.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
             vehicleRepository.save(vehicle.get());
-            return ResponseEntity.ok(rentRepository.save(newRent));
+
+            RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
+            RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+            return ResponseEntity.ok(rentResponse);
+
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create rent ");
         }
@@ -316,49 +387,94 @@ public class AdminServices {
 
     // eliminazione di un noleggio per un cliente tramite id
     // ok
-    public boolean deleteRent(Long id) {
-        if (rentRepository.existsById(id)) {
+    public ResponseEntity<Void> deleteRent(Long id) {
+        Optional<RentInfo> optionalRent = rentRepository.findById(id);
+        if (optionalRent.isPresent()) {
+            RentInfo rent = optionalRent.get();
+            Long vehicleId = rent.getVehicle().getVehicleId();
             rentRepository.deleteById(id);
-            return true;
+
+            Optional<Vehicle> optionalVehicle = vehicleRepository.findById(vehicleId);
+            if (optionalVehicle.isPresent()) {
+                Vehicle vehicle = optionalVehicle.get();
+                vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
+                vehicleRepository.save(vehicle);
+            }
+            return ResponseEntity.noContent().build();
         }
-        return false;
+        return ResponseEntity.notFound().build();
     }
 
     // modifica di un noleggio
     // ok
-    public ResponseEntity<Object> modifyRentById(Long id, String choice, RentInfo rent) {
+    public ResponseEntity<RentResponse> modifyRentById(Long id, String choice, RentRequest rentRequest, Long customerId,
+            Long vehicleId, Long sellerId) {
         Optional<RentInfo> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
+
+            RentInfo rentRequestEntity = optionalRent.get();
+            boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
+            boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
+            if (!isValidCustomer || !isValidSeller) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
             switch (choice) {
                 case "dailyCost":
-                    optionalRent.get().setDailyCost(rent.getDailyCost());
+                    rentRequestEntity.setDailyCost(rentRequest.getDailyCost());
                     break;
                 case "startDate":
-                    optionalRent.get().setStartDate(rent.getStartDate());
+                    rentRequestEntity.setStartDate(rentRequest.getStartDate());
                     break;
                 case "endDate":
-                    optionalRent.get().setEndDate(rent.getEndDate());
+                    rentRequestEntity.setEndDate(rentRequest.getEndDate());
+                    break;
+                case "totalCost":
+                    rentRequestEntity.setEndDate(rentRequest.getEndDate());
+                    break;
+                case "isPaid":
+                    rentRequestEntity.setEndDate(rentRequest.getEndDate());
+                    break;
+                case "vehicle":
+                    rentRequestEntity.setEndDate(rentRequest.getEndDate());
+                    break;
+                case "customer":
+                    Users customer = userRepository.getReferenceById(customerId);
+                    rentRequestEntity.setCustomer(customer);
+                    break;
+                case "seller":
+                    Users seller = userRepository.getReferenceById(sellerId);
+                    rentRequestEntity.setSeller(seller);
+                    break;
+                case "Vehicle":
+                    Vehicle vehicle = vehicleRepository.getReferenceById(vehicleId);
+                    rentRequestEntity.setVehicle(vehicle);
                     break;
                 case "all":
-                    modifyAllPartOfRent(id, choice, rent, optionalRent);
+                    modifyAllPartOfRent(rentRequestEntity, rentRequest);
                     break;
                 default:
 
                     break;
             }
-            return ResponseEntity.ok(rentRepository.saveAndFlush(optionalRent.get()));
+            RentInfo modifiedRent = rentRepository.saveAndFlush(rentRequestEntity);
+            RentModel modifiedRentModel = RentModel.mapEntityToModel(modifiedRent);
+            RentResponse rentResponse = RentModel.mapModelToResponse(modifiedRentModel);
+
+            return ResponseEntity.ok(rentResponse);
         }
-        return null;
+        return ResponseEntity.notFound().build();
     }
 
     // modifica di tutti i parametri di un noleggio
-    private Optional<RentInfo> modifyAllPartOfRent(Long id, String choice, RentInfo rent,
-            Optional<RentInfo> optionalRent) {
-        Optional<RentInfo> modifyRent = optionalRent;
-        optionalRent.get().setDailyCost(rent.getDailyCost());
-        optionalRent.get().setStartDate(rent.getStartDate());
-        optionalRent.get().setEndDate(rent.getEndDate());
-        return modifyRent;
+    private void modifyAllPartOfRent(RentInfo rentRequestEntity, RentRequest rentRequest) {
+        rentRequestEntity.setStartDate(rentRequest.getStartDate());
+        rentRequestEntity.setEndDate(rentRequest.getEndDate());
+        rentRequestEntity.setDailyCost(rentRequest.getDailyCost());
+        rentRequestEntity.setTotalCost(rentRequest.getTotalCost());
+        rentRequestEntity.setIsPaid(rentRequest.getIsPaid());
+        rentRequestEntity.setVehicle(rentRequest.getVehicle());
+        rentRequestEntity.setCustomer(rentRequest.getCustomer());
+        rentRequestEntity.setSeller(rentRequest.getSeller());
     }
 
     // --------------- logica dei controller per operazioni sugli acquisti

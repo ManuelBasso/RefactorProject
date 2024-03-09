@@ -8,8 +8,11 @@ import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.car.cardto.VehicleRequest;
 import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.order.OrderInfo;
-
+import com.develhope.spring.order.orderdto.OrderRequest;
+import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.rentdto.RentRequest;
+import com.develhope.spring.rent.rentdto.RentResponse;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
@@ -57,19 +60,16 @@ public class AdminController {
     }
 
     // eliminazione veicolo tramite id
-    // funziona ma prima bisogna svuotare i parametri del veicolo in questione
-    // con i seguenti comandi
-    // DELETE FROM orders WHERE vehicle_id = :vehicleId;
-    // DELETE FROM rents WHERE vehicle_id = :vehicleId;
     @DeleteMapping("/admin/{id}/deleteVehicleById")
-    public boolean deleteVehicleById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteVehicleById(@PathVariable Long id) {
         return adminServices.deleteVehicle(id);
     }
 
     // cambio dello stato di un veicolo
     // funziona
     @PatchMapping("/admin/{id}/changeStatusOfAVehicle")
-    public ResponseEntity<Object> changeStatusOfAVehicle(@PathVariable Long id, @RequestParam VehicleStatus status) {
+    public ResponseEntity<VehicleResponse> changeStatusOfAVehicle(@PathVariable Long id,
+            @RequestParam VehicleStatus status) {
         return adminServices.changeStatusVehicle(id, status);
     }
 
@@ -78,14 +78,14 @@ public class AdminController {
     // ottenere tutti gli ordini
     // funziona
     @GetMapping("/admin/getAllOrder")
-    public ResponseEntity<Object> getOrder() {
+    public ResponseEntity<List<OrderResponse>> getOrder() {
         return adminServices.getOrder();
     }
 
     // creazione nuovo ordine per un utente specifico
     // funziona
     @PostMapping("/admin/{id}/createOrderForAUser")
-    public ResponseEntity<Object> creatOrderForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
+    public ResponseEntity<OrderResponse> creatOrderForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
             @RequestParam boolean advance) {
         return adminServices.createOrderForAUser(id, vehicle_Id, advance);
     }
@@ -93,16 +93,17 @@ public class AdminController {
     // eliminazione di un ordine per un cliente tramite id
     // funziona
     @DeleteMapping("/admin/{id}/deleteAOrderById")
-    public boolean deleteOrderById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteOrderById(@PathVariable Long id) {
         return adminServices.deleteOrder(id);
     }
 
     // modifica di un ordine
     // funziona
     @PutMapping("/admin/{id}/modifyOrder")
-    public ResponseEntity<Object> modifyOrderById(@PathVariable Long id, @RequestParam Long userid,
-            @RequestParam String choice, @RequestBody OrderInfo order) {
-        return adminServices.modifyOrderBy(id, choice, order, userid);
+    public ResponseEntity<OrderResponse> modifyOrderById(@PathVariable Long id, Long customerId,
+            Long sellerId, Long vehicleId,
+            @RequestParam String choice, @RequestBody OrderRequest order) {
+        return adminServices.modifyOrderBy(id, choice, order, customerId, sellerId, vehicleId);
     }
 
     // --------------- controller per operazioni sui noleggi -------------
@@ -110,13 +111,13 @@ public class AdminController {
     // ottenere tutti gli noleggio
     // funziona
     @GetMapping("/admin/getAllRent")
-    public ResponseEntity<Object> getRent() {
+    public ResponseEntity<List<RentResponse>> getRent() {
         return adminServices.getallRent();
     }
 
     // creazione nuovo noleggio per un utente specifico
     @PostMapping("/admin/{id}/createRentForAUser")
-    public ResponseEntity<Object> creatRentForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
+    public ResponseEntity<RentResponse> creatRentForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
             @RequestParam String startDate,
             @RequestParam String endDate, @RequestParam Double dailyCost) {
         return adminServices.createRentForAUser(id, vehicle_Id, startDate, endDate, dailyCost);
@@ -126,15 +127,16 @@ public class AdminController {
     // funziona ma prima bisogna svuotare i parametri del noleggio in questione
     // come la delete del veicolo
     @DeleteMapping("/admin/{id}/deleteRentById")
-    public boolean deleteRentById(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteRentById(@PathVariable Long id) {
         return adminServices.deleteRent(id);
     }
 
     // modifica di un noleggio
     @PutMapping("/admin/{id}/modifyRent")
-    public ResponseEntity<Object> modifyRentById(@PathVariable Long id,
-            @RequestParam String choice, @RequestBody RentInfo rent) {
-        return adminServices.modifyRentById(id, choice, rent);
+    public ResponseEntity<RentResponse> modifyRentById(@PathVariable Long id,
+            @RequestParam String choice, @RequestBody RentRequest rentRequest, Long customerId,
+            Long vehicleId, Long sellerId) {
+        return adminServices.modifyRentById(id, choice, rentRequest, customerId, vehicleId, sellerId);
     }
 
     // --------------- controller per operazioni sugli acquisti -------------
