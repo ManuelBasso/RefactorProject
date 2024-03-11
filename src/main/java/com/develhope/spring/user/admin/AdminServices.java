@@ -25,7 +25,10 @@ import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.purchase.PurchaseInfo;
+import com.develhope.spring.purchase.PurchaseModel;
 import com.develhope.spring.purchase.PurchaseRepository;
+import com.develhope.spring.purchase.purchasedto.PurchaseRequest;
+import com.develhope.spring.purchase.purchasedto.PurchaseResponse;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
@@ -328,9 +331,9 @@ public class AdminServices {
     public ResponseEntity<List<RentResponse>> getallRent() {
         List<RentInfo> response = rentRepository.findAll();
         List<RentResponse> result = new ArrayList<>();
-        for (RentInfo order : response) {
-            RentModel orderModel = RentModel.mapEntityToModel(order);
-            result.add(RentModel.mapModelToResponse(orderModel));
+        for (RentInfo rent : response) {
+            RentModel rentModel = RentModel.mapEntityToModel(rent);
+            result.add(RentModel.mapModelToResponse(rentModel));
         }
         return ResponseEntity.ok(result);
     }
@@ -481,12 +484,18 @@ public class AdminServices {
     // -------------
 
     // ottieni tutti gli acquisti
-    public ResponseEntity<Object> getPurchase() {
-        return ResponseEntity.ok(purchaseRepository.findAll());
+    public ResponseEntity<List<PurchaseResponse>> getPurchase() {
+        List<PurchaseInfo> response = purchaseRepository.findAll();
+        List<PurchaseResponse> result = new ArrayList<>();
+        for (PurchaseInfo purchase : response) {
+            PurchaseModel purchaseModel = PurchaseModel.mapEntityToModel(purchase);
+            result.add(PurchaseModel.mapModelToResponse(purchaseModel));
+        }
+        return ResponseEntity.ok(result);
     }
 
     // crea un acquisto per un utente
-    public ResponseEntity<Object> createPurchaseForAUser(Long id, Long vehicle_Id) {
+    public ResponseEntity<PurchaseResponse> createPurchaseForAUser(Long id, Long vehicle_Id) {
         Optional<Users> user = userRepository.findById(id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_Id);
         if (!user.isPresent() || !vehicle.isPresent()) {
@@ -507,42 +516,68 @@ public class AdminServices {
 
     }
 
-    private Object purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle) {
-        PurchaseInfo newPurchase2 = new PurchaseInfo();
-        newPurchase2.setCustomer(user.get());
-        newPurchase2.setVehicle(vehicle.get());
-        newPurchase2.setTotalPrice(vehicle.get().getPrice());
+    private PurchaseResponse purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle) {
+        PurchaseRequest newPurchaseRequest = new PurchaseRequest();
+        newPurchaseRequest.setCustomer(user.get());
+        newPurchaseRequest.setVehicle(vehicle.get());
+        newPurchaseRequest.setTotalPrice(vehicle.get().getPrice());
+
+        PurchaseModel newPurchaseModel = PurchaseModel.mapRequestToModel(newPurchaseRequest);
         try {
             vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
             vehicleRepository.save(vehicle.get());
-            return ResponseEntity.ok(purchaseRepository.save(newPurchase2));
+
+            PurchaseInfo newPurchaseInfo = PurchaseModel.mapModelToEntity(newPurchaseModel);
+            PurchaseInfo savedPurchaseInfo = purchaseRepository.save(newPurchaseInfo);
+            PurchaseResponse purchaseResponse = PurchaseModel.mapModelToResponse(
+                    PurchaseModel.mapEntityToModel(savedPurchaseInfo));
+
+            return purchaseResponse;
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create purchase ");
         }
     }
 
-    public PurchaseInfo purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<OrderInfo> order) {
-        PurchaseInfo newPurchase = new PurchaseInfo();
-        newPurchase.setCustomer(order.get().getCustomer());
-        newPurchase.setVehicle(order.get().getVehicle());
-        newPurchase.setTotalPrice(vehicle.get().getPrice() - order.get().getAdvancePayment());
-        newPurchase.setOrder(order.get());
+    public PurchaseResponse purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<OrderInfo> order) {
+        PurchaseRequest purchaseRequest = new PurchaseRequest();
+        purchaseRequest.setCustomer(order.get().getCustomer());
+        purchaseRequest.setVehicle(order.get().getVehicle());
+        purchaseRequest.setTotalPrice(vehicle.get().getPrice() - order.get().getAdvancePayment());
+        purchaseRequest.setOrder(order.get());
+
+        PurchaseModel newPurchaseModel = PurchaseModel.mapRequestToModel(purchaseRequest);
         try {
             vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
             vehicleRepository.save(vehicle.get());
-            return purchaseRepository.save(newPurchase);
+
+            PurchaseInfo newPurchaseInfo = PurchaseModel.mapModelToEntity(newPurchaseModel);
+            PurchaseInfo savedPurchaseInfo = purchaseRepository.save(newPurchaseInfo);
+            PurchaseResponse purchaseResponse = PurchaseModel.mapModelToResponse(
+                    PurchaseModel.mapEntityToModel(savedPurchaseInfo));
+
+            return purchaseResponse;
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create purchase with order");
         }
     }
 
     // elimina un acquisto per un utente
-    public boolean deletePurchase(Long id) {
-        if (purchaseRepository.existsById(id)) {
+    public ResponseEntity<Void> deletePurchase(Long id) {
+        Optional<PurchaseInfo> optionalPurchase = purchaseRepository.findById(id);
+        if (optionalPurchase.isPresent()) {
+            PurchaseInfo purchase = optionalPurchase.get();
+            Long vehicleId = purchase.getVehicle().getVehicleId();
             purchaseRepository.deleteById(id);
-            return true;
+
+            Optional<Vehicle> optionalVehicle = vehicleRepository.findById(vehicleId);
+            if (optionalVehicle.isPresent()) {
+                Vehicle vehicle = optionalVehicle.get();
+                vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
+                vehicleRepository.save(vehicle);
+            }
+            return ResponseEntity.noContent().build();
         }
-        return false;
+        return ResponseEntity.notFound().build();
     }
 
     // modifica un acquisto per un utente

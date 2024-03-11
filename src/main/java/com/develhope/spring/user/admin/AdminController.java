@@ -10,6 +10,7 @@ import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
+import com.develhope.spring.purchase.purchasedto.PurchaseResponse;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
@@ -142,17 +143,18 @@ public class AdminController {
     // --------------- controller per operazioni sugli acquisti -------------
 
     @GetMapping("/admin/getAllPurchase")
-    public ResponseEntity<Object> getPurchase() {
+    public ResponseEntity<List<PurchaseResponse>> getPurchase() {
         return adminServices.getPurchase();
     }
 
     @PostMapping("/admin/{id}/createPurchaseForAUser")
-    public ResponseEntity<Object> createPurchaseForUser(@PathVariable Long id, @RequestParam Long vehicle_Id) {
+    public ResponseEntity<PurchaseResponse> createPurchaseForUser(@PathVariable Long id,
+            @RequestParam Long vehicle_Id) {
         return adminServices.createPurchaseForAUser(id, vehicle_Id);
     }
 
     @DeleteMapping("/admin/{id}/deletePurchaseById")
-    public boolean deletePurchaseById(@PathVariable Long id) {
+    public ResponseEntity<Void> deletePurchaseById(@PathVariable Long id) {
         return adminServices.deletePurchase(id);
     }
     // devo chiedere ad antonio cosa devo modificare in un acquisto
