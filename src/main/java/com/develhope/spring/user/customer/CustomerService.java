@@ -12,8 +12,11 @@ import com.develhope.spring.rent.RentRepository;
 
 import com.develhope.spring.role.Role;
 import com.develhope.spring.role.RoleRepository;
+import com.develhope.spring.user.UserModel;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.UserRepository;
+import com.develhope.spring.user.userdto.UserNetworkResponse;
+import com.develhope.spring.user.userdto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,10 +88,22 @@ public class CustomerService {
         }
     }
 
-    public ResponseEntity<Users> updateCustomerName(Users customer, String newFirstName) {
+    public UserNetworkResponse updateCustomerName(Users customer, String newFirstName) {
+        if (newFirstName == null) {
+            return UserNetworkResponse.Error.builder().code(600).description("null value").build();
+        }
+        if (newFirstName.isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(601).description("Empty String").build();
+        }
+        else {
+            customer.setFirstName(newFirstName);
+            userRepository.saveAndFlush(customer);
+            UserModel userModel= UserModel.mapEntityToModel(customer);
+            UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+            UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
+            return response;
+        }
 
-        customer.setFirstName(newFirstName);
-        return ResponseEntity.ok(userRepository.save(customer));
     }
 
     public ResponseEntity<Users> updateLastName(Users customer, String newLastName) {

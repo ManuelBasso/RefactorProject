@@ -3,6 +3,7 @@ package com.develhope.spring.user.customer;
 import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.user.Users;
+import com.develhope.spring.user.userdto.UserNetworkResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -70,8 +71,16 @@ public class CustomerController {
     //Modificare i dati dell’utente
 
     @PutMapping("/updateFirstName")
-    public ResponseEntity<Users> updateCustomerName(@AuthenticationPrincipal Users customer, @RequestParam String firstName) {
-        return customerService.updateCustomerName(customer, firstName);
+    public ResponseEntity<?> updateCustomerName(@AuthenticationPrincipal Users customer, @RequestParam String firstName) {
+        UserNetworkResponse response = customerService.updateCustomerName(customer, firstName);
+
+        if (response instanceof UserNetworkResponse.Success){
+            return ResponseEntity.ok(((UserNetworkResponse.Success) response).getUserResponse());
+        } else {
+            int code = ((UserNetworkResponse.Error) response).getCode();
+            String description = ((UserNetworkResponse.Error) response).getDescription();
+            return ResponseEntity.status(code).body(description);
+        }
     }
     @PutMapping("/updateLastName")
     public ResponseEntity<Users> updateLastName(@AuthenticationPrincipal Users customer, @RequestParam String lastName) {
