@@ -3,19 +3,21 @@ package com.develhope.spring.user.admin;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleStatus;
 import com.develhope.spring.car.cardto.VehicleRequest;
 import com.develhope.spring.car.cardto.VehicleResponse;
-import com.develhope.spring.order.OrderInfo;
-
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.order.orderdto.OrderRequest;
+import com.develhope.spring.order.orderdto.OrderResponse;
+import com.develhope.spring.purchase.purchasedto.PurchaseResponse;
+import com.develhope.spring.rent.rentdto.RentRequest;
+import com.develhope.spring.rent.rentdto.RentResponse;
 
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -35,123 +37,179 @@ public class AdminController {
     // --------------- controller per operazioni sui veicoli -------------
 
     // vedere quali veicolo esistono , accessibile a tutti i tipi di utente
-    // funziona
+
     @GetMapping("/admin/gettAllVehicle")
-    public ResponseEntity<List<VehicleResponse>> getVehicle() {
-        return adminServices.getVehicle();
+    public ResponseEntity<?> getVehicle() {
+        List<VehicleResponse> vehicleList = adminServices.getVehicle();
+        if (vehicleList == null || vehicleList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle list is null or empty");
+        }
+        return ResponseEntity.ok(vehicleList);
     }
 
     // creazione nuovo veicolo
-    // funziona
     @PostMapping("/admin/addVehicle")
     public ResponseEntity<VehicleResponse> addAVehicle(@RequestBody VehicleRequest newVehicleRequest) {
-        return adminServices.addVehicle(newVehicleRequest);
+        return ResponseEntity.ok(adminServices.addVehicle(newVehicleRequest));
     }
 
     // modifica dei parametri di un veicolo
-    // funziona
     @PutMapping("/admin/{id}/modifyAVehicle")
-    public ResponseEntity<VehicleResponse> modifVehicleById(@PathVariable Long id, @RequestParam String choice,
+    public ResponseEntity<?> modifVehicleById(@PathVariable Long id, @RequestParam String choice,
             @RequestBody VehicleRequest vehicleRequest) {
-        return adminServices.modifyVehicle(id, choice, vehicleRequest);
+        VehicleResponse modifiedVehicle = adminServices.modifyVehicle(id, choice, vehicleRequest);
+        if (modifiedVehicle == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not Found");
+        } else {
+            return ResponseEntity.ok(modifiedVehicle);
+        }
     }
 
     // eliminazione veicolo tramite id
-    // funziona ma prima bisogna svuotare i parametri del veicolo in questione
-    // con i seguenti comandi
-    // DELETE FROM orders WHERE vehicle_id = :vehicleId;
-    // DELETE FROM rents WHERE vehicle_id = :vehicleId;
     @DeleteMapping("/admin/{id}/deleteVehicleById")
-    public boolean deleteVehicleById(@PathVariable Long id) {
-        return adminServices.deleteVehicle(id);
+    public ResponseEntity<?> deleteVehicleById(@PathVariable Long id) {
+        boolean vehicleFoundAndDeleted = adminServices.deleteVehicle(id);
+        if (vehicleFoundAndDeleted) {
+            return ResponseEntity.ok(vehicleFoundAndDeleted);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not Found");
+        }
     }
 
     // cambio dello stato di un veicolo
-    // funziona
     @PatchMapping("/admin/{id}/changeStatusOfAVehicle")
-    public ResponseEntity<Object> changeStatusOfAVehicle(@PathVariable Long id, @RequestParam VehicleStatus status) {
-        return adminServices.changeStatusVehicle(id, status);
+    public ResponseEntity<?> changeStatusOfAVehicle(@PathVariable Long id,
+            @RequestParam VehicleStatus status) {
+        VehicleResponse modifiedVehicle = adminServices.changeStatusVehicle(id, status);
+        if (modifiedVehicle != null) {
+            return ResponseEntity.ok(modifiedVehicle);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Vehicle not Found");
+        }
+
     }
 
     // --------------- controller per operazioni sui ordini -------------
 
     // ottenere tutti gli ordini
-    // funziona
     @GetMapping("/admin/getAllOrder")
-    public ResponseEntity<Object> getOrder() {
-        return adminServices.getOrder();
+    public ResponseEntity<?> getOrder() {
+        List<OrderResponse> orderList = adminServices.getOrder();
+        if (orderList == null || orderList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order List is null or empty");
+        } else {
+            return ResponseEntity.ok(orderList);
+        }
     }
 
     // creazione nuovo ordine per un utente specifico
-    // funziona
     @PostMapping("/admin/{id}/createOrderForAUser")
-    public ResponseEntity<Object> creatOrderForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
+    public ResponseEntity<OrderResponse> creatOrderForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
             @RequestParam boolean advance) {
-        return adminServices.createOrderForAUser(id, vehicle_Id, advance);
+        OrderResponse newOrder = adminServices.createOrderForAUser(id, vehicle_Id, advance);
+        return ResponseEntity.ok(newOrder);
     }
 
     // eliminazione di un ordine per un cliente tramite id
-    // funziona
     @DeleteMapping("/admin/{id}/deleteAOrderById")
-    public boolean deleteOrderById(@PathVariable Long id) {
-        return adminServices.deleteOrder(id);
+    public ResponseEntity<?> deleteOrderById(@PathVariable Long id) {
+        boolean deletedOrder = adminServices.deleteOrder(id);
+        if (deletedOrder) {
+            return ResponseEntity.ok(deletedOrder);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("order not Found");
+        }
     }
 
     // modifica di un ordine
-    // funziona
     @PutMapping("/admin/{id}/modifyOrder")
-    public ResponseEntity<Object> modifyOrderById(@PathVariable Long id, @RequestParam Long userid,
-            @RequestParam String choice, @RequestBody OrderInfo order) {
-        return adminServices.modifyOrderBy(id, choice, order, userid);
+    public ResponseEntity<?> modifyOrderById(@PathVariable Long id, Long customerId,
+            Long sellerId, Long vehicleId,
+            @RequestParam String choice, @RequestBody OrderRequest order) {
+        OrderResponse modifiedOrder = adminServices.modifyOrderBy(id, choice, order, customerId, sellerId, vehicleId);
+        if (modifiedOrder == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("order not Found or invalid user or vehicle id");
+        } else {
+            return ResponseEntity.ok(modifiedOrder);
+        }
     }
 
     // --------------- controller per operazioni sui noleggi -------------
 
-    // ottenere tutti gli noleggio
-    // funziona
+    // ottenere tutti i noleggi
     @GetMapping("/admin/getAllRent")
-    public ResponseEntity<Object> getRent() {
-        return adminServices.getallRent();
+    public ResponseEntity<?> getRent() {
+        List<RentResponse> rentList = adminServices.getallRent();
+        if (rentList != null && !rentList.isEmpty()) {
+            return ResponseEntity.ok(rentList);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("rent list is null or empty");
+        }
     }
 
     // creazione nuovo noleggio per un utente specifico
     @PostMapping("/admin/{id}/createRentForAUser")
-    public ResponseEntity<Object> creatRentForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
+    public ResponseEntity<?> creatRentForUser(@PathVariable Long id, @RequestParam Long vehicle_Id,
             @RequestParam String startDate,
             @RequestParam String endDate, @RequestParam Double dailyCost) {
-        return adminServices.createRentForAUser(id, vehicle_Id, startDate, endDate, dailyCost);
+        RentResponse newRent = adminServices.createRentForAUser(id, vehicle_Id, startDate, endDate, dailyCost);
+        return ResponseEntity.ok(newRent);
     }
 
     // eliminazione di un noleggio per un cliente tramite id
     // funziona ma prima bisogna svuotare i parametri del noleggio in questione
     // come la delete del veicolo
     @DeleteMapping("/admin/{id}/deleteRentById")
-    public boolean deleteRentById(@PathVariable Long id) {
-        return adminServices.deleteRent(id);
+    public ResponseEntity<?> deleteRentById(@PathVariable Long id) {
+        boolean rentIsDeleted = adminServices.deleteRent(id);
+        if (rentIsDeleted) {
+            return ResponseEntity.ok(rentIsDeleted);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("rent not found");
+        }
     }
 
     // modifica di un noleggio
     @PutMapping("/admin/{id}/modifyRent")
-    public ResponseEntity<Object> modifyRentById(@PathVariable Long id,
-            @RequestParam String choice, @RequestBody RentInfo rent) {
-        return adminServices.modifyRentById(id, choice, rent);
+    public ResponseEntity<?> modifyRentById(@PathVariable Long id,
+            @RequestParam String choice, @RequestBody RentRequest rentRequest, Long customerId,
+            Long vehicleId, Long sellerId) {
+        RentResponse modifiedRent = adminServices.modifyRentById(id, choice, rentRequest, customerId, vehicleId,
+                sellerId);
+        if (modifiedRent == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Rent not found or invalid user or vehicle id");
+        } else {
+            return ResponseEntity.ok(modifiedRent);
+        }
     }
 
     // --------------- controller per operazioni sugli acquisti -------------
 
     @GetMapping("/admin/getAllPurchase")
-    public ResponseEntity<Object> getPurchase() {
-        return adminServices.getPurchase();
+    public ResponseEntity<?> getPurchase() {
+        List<PurchaseResponse> purchaseList = adminServices.getPurchase();
+        if (purchaseList == null || purchaseList.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("purchase list is null or empty");
+        } else {
+            return ResponseEntity.ok(purchaseList);
+        }
     }
 
     @PostMapping("/admin/{id}/createPurchaseForAUser")
-    public ResponseEntity<Object> createPurchaseForUser(@PathVariable Long id, @RequestParam Long vehicle_Id) {
-        return adminServices.createPurchaseForAUser(id, vehicle_Id);
+    public ResponseEntity<PurchaseResponse> createPurchaseForUser(@PathVariable Long id,
+            @RequestParam Long vehicle_Id) {
+        PurchaseResponse newPurchase = adminServices.createPurchaseForAUser(id, vehicle_Id);
+        return ResponseEntity.ok(newPurchase);
     }
 
     @DeleteMapping("/admin/{id}/deletePurchaseById")
-    public boolean deletePurchaseById(@PathVariable Long id) {
-        return adminServices.deletePurchase(id);
+    public ResponseEntity<?> deletePurchaseById(@PathVariable Long id) {
+        boolean purchaseIsDeleted = adminServices.deletePurchase(id);
+        if (purchaseIsDeleted) {
+            return ResponseEntity.ok(purchaseIsDeleted);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("purchase not Found");
+        }
     }
     // devo chiedere ad antonio cosa devo modificare in un acquisto
 
