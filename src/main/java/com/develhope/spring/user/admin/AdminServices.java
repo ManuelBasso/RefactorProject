@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.develhope.spring.car.Vehicle;
@@ -60,30 +58,27 @@ public class AdminServices {
     // -------------
 
     // tutti i veicoli
-    // ok
-    public ResponseEntity<List<VehicleResponse>> getVehicle() {
+    public List<VehicleResponse> getVehicle() {
         List<Vehicle> response = vehicleRepository.findAll();
         List<VehicleResponse> result = new ArrayList<>();
         for (Vehicle vehicle : response) {
             VehicleModel vehicleModel = VehicleModel.mapEntityToModel(vehicle);
             result.add(VehicleModel.mapModelToResponse(vehicleModel));
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // aggiunzione di un veicolo
-    // ok
-    public ResponseEntity<VehicleResponse> addVehicle(VehicleRequest newVehicleRequest) {
+    public VehicleResponse addVehicle(VehicleRequest newVehicleRequest) {
         VehicleModel vehicleRequestModel = VehicleModel.mapRequestToModel(newVehicleRequest);
         Vehicle vehicleRequestEntity = VehicleModel.mapModelToEntity(vehicleRequestModel);
         Vehicle savedVehicle = vehicleRepository.saveAndFlush(vehicleRequestEntity);
         VehicleModel vehicleResponseModel = VehicleModel.mapEntityToModel(savedVehicle);
-        return ResponseEntity.ok(VehicleModel.mapModelToResponse(vehicleResponseModel));
+        return VehicleModel.mapModelToResponse(vehicleResponseModel);
     }
 
     // metodo per la modifica di un solo parametro del veicolo
-    // ok
-    public ResponseEntity<VehicleResponse> modifyVehicle(Long id, String choice, VehicleRequest vehicleRequest) {
+    public VehicleResponse modifyVehicle(Long id, String choice, VehicleRequest vehicleRequest) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle vehicleRequestEntity = optionalVehicle.get();
@@ -134,9 +129,9 @@ public class AdminServices {
             Vehicle modifiedVehicle = vehicleRepository.saveAndFlush(vehicleRequestEntity);
             VehicleModel modifiedVehicleModel = VehicleModel.mapEntityToModel(modifiedVehicle);
             VehicleResponse vehicleResponse = VehicleModel.mapModelToResponse(modifiedVehicleModel);
-            return ResponseEntity.ok(vehicleResponse);
+            return vehicleResponse;
         }
-        return ResponseEntity.notFound().build();
+        return null;
     }
 
     // metodo per la modifica di tutti i parametri del veicolo
@@ -158,45 +153,42 @@ public class AdminServices {
 
     // eliminazione di un veicolo
     // ok
-    public ResponseEntity<Void> deleteVehicle(Long id) {
+    public boolean deleteVehicle(Long id) {
         if (vehicleRepository.existsById(id)) {
             vehicleRepository.deleteById(id);
-            return ResponseEntity.noContent().build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 
     // cambio dello Status di un veicolo
-    // ok
-    public ResponseEntity<VehicleResponse> changeStatusVehicle(Long id, VehicleStatus status) {
+    public VehicleResponse changeStatusVehicle(Long id, VehicleStatus status) {
         Optional<Vehicle> optionalVehicle = vehicleRepository.findById(id);
         if (optionalVehicle.isPresent()) {
             Vehicle updatedVehicle = optionalVehicle.get();
             updatedVehicle.setIsAvailable(status);
             Vehicle modifiedVehicle = vehicleRepository.saveAndFlush(updatedVehicle);
             VehicleModel updatedVehicleModel = VehicleModel.mapEntityToModel(modifiedVehicle);
-            return ResponseEntity.ok(VehicleModel.mapModelToResponse(updatedVehicleModel));
+            return VehicleModel.mapModelToResponse(updatedVehicleModel);
         }
-        return ResponseEntity.notFound().build();
+        return null;
     }
 
     // --------------- logica dei controller per operazioni sui ordini -------------
 
     // ottenere tutti gli ordini
-    // ok
-    public ResponseEntity<List<OrderResponse>> getOrder() {
+    public List<OrderResponse> getOrder() {
         List<OrderInfo> response = orderRepository.findAll();
         List<OrderResponse> result = new ArrayList<>();
         for (OrderInfo order : response) {
             OrderModel orderModel = OrderModel.mapEntityToModel(order);
             result.add(OrderModel.mapModelToResponse(orderModel));
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // creazione ordine per un utente tramite id
-    // ok
-    public ResponseEntity<OrderResponse> createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+    public OrderResponse createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
@@ -223,13 +215,13 @@ public class AdminServices {
             OrderInfo orderInfo = orderRepository.save(OrderModel.mapModelToEntity(orderModel));
             OrderResponse orderResponse = OrderModel.mapModelToResponse(OrderModel.mapEntityToModel(orderInfo));
 
-            return ResponseEntity.ok(orderResponse);
+            return orderResponse;
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create order");
         }
     }
 
-    // calcola un aticipo di base che è yguale al trenta percento del costo
+    // calcola un aticipo di base che è uguale al trenta percento del costo
     // dell'auto
     private Double getAdvancePaymentAmount(Long vehicle_id) {
         Vehicle vehicle = vehicleRepository.getReferenceById(vehicle_id);
@@ -238,8 +230,7 @@ public class AdminServices {
     }
 
     // eliminazione di un ordine per un cliente tramite id
-    // ok
-    public ResponseEntity<Void> deleteOrder(Long id) {
+    public boolean deleteOrder(Long id) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
             OrderInfo order = optionalOrder.get();
@@ -252,14 +243,13 @@ public class AdminServices {
                 vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
                 vehicleRepository.save(vehicle);
             }
-            return ResponseEntity.noContent().build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 
     // modifica di un ordine
-    // ok
-    public ResponseEntity<OrderResponse> modifyOrderBy(Long id, String choice, OrderRequest orderRequest,
+    public OrderResponse modifyOrderBy(Long id, String choice, OrderRequest orderRequest,
             Long customerId, Long sellerId, Long vehicleId) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
@@ -268,7 +258,7 @@ public class AdminServices {
             boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
             boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
             if (!isValidCustomer || !isValidSeller) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return null;
             }
 
             switch (choice) {
@@ -303,9 +293,9 @@ public class AdminServices {
             OrderInfo modifiedOrder = orderRepository.saveAndFlush(orderRequestEntity);
             OrderModel modifiedOrderModel = OrderModel.mapEntityToModel(modifiedOrder);
             OrderResponse orderResponse = OrderModel.mapModelToResponse(modifiedOrderModel);
-            return ResponseEntity.ok(orderResponse);
+            return orderResponse;
         }
-        return ResponseEntity.notFound().build();
+        return null;
     }
 
     private boolean checkUserRoles(Long userId, RoleType requiredRole) {
@@ -328,18 +318,18 @@ public class AdminServices {
     // -------------
 
     // ottenere tutti i noleggi
-    public ResponseEntity<List<RentResponse>> getallRent() {
+    public List<RentResponse> getallRent() {
         List<RentInfo> response = rentRepository.findAll();
         List<RentResponse> result = new ArrayList<>();
         for (RentInfo rent : response) {
             RentModel rentModel = RentModel.mapEntityToModel(rent);
             result.add(RentModel.mapModelToResponse(rentModel));
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // creazione noleggio per un utente tramite id
-    public ResponseEntity<RentResponse> createRentForAUser(Long user_id, Long vehicle_id, String startDate,
+    public RentResponse createRentForAUser(Long user_id, Long vehicle_id, String startDate,
             String endDate,
             Double dailyCost) throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
@@ -369,7 +359,7 @@ public class AdminServices {
             RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
             RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
             RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
-            return ResponseEntity.ok(rentResponse);
+            return rentResponse;
 
         } catch (Exception e) {
             throw new OrderRentCreationException("Failed to create rent ");
@@ -389,8 +379,7 @@ public class AdminServices {
     }
 
     // eliminazione di un noleggio per un cliente tramite id
-    // ok
-    public ResponseEntity<Void> deleteRent(Long id) {
+    public boolean deleteRent(Long id) {
         Optional<RentInfo> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
             RentInfo rent = optionalRent.get();
@@ -403,14 +392,13 @@ public class AdminServices {
                 vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
                 vehicleRepository.save(vehicle);
             }
-            return ResponseEntity.noContent().build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 
     // modifica di un noleggio
-    // ok
-    public ResponseEntity<RentResponse> modifyRentById(Long id, String choice, RentRequest rentRequest, Long customerId,
+    public RentResponse modifyRentById(Long id, String choice, RentRequest rentRequest, Long customerId,
             Long vehicleId, Long sellerId) {
         Optional<RentInfo> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
@@ -419,7 +407,7 @@ public class AdminServices {
             boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
             boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
             if (!isValidCustomer || !isValidSeller) {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+                return null;
             }
             switch (choice) {
                 case "dailyCost":
@@ -463,9 +451,9 @@ public class AdminServices {
             RentModel modifiedRentModel = RentModel.mapEntityToModel(modifiedRent);
             RentResponse rentResponse = RentModel.mapModelToResponse(modifiedRentModel);
 
-            return ResponseEntity.ok(rentResponse);
+            return rentResponse;
         }
-        return ResponseEntity.notFound().build();
+        return null;
     }
 
     // modifica di tutti i parametri di un noleggio
@@ -484,18 +472,18 @@ public class AdminServices {
     // -------------
 
     // ottieni tutti gli acquisti
-    public ResponseEntity<List<PurchaseResponse>> getPurchase() {
+    public List<PurchaseResponse> getPurchase() {
         List<PurchaseInfo> response = purchaseRepository.findAll();
         List<PurchaseResponse> result = new ArrayList<>();
         for (PurchaseInfo purchase : response) {
             PurchaseModel purchaseModel = PurchaseModel.mapEntityToModel(purchase);
             result.add(PurchaseModel.mapModelToResponse(purchaseModel));
         }
-        return ResponseEntity.ok(result);
+        return result;
     }
 
     // crea un acquisto per un utente
-    public ResponseEntity<PurchaseResponse> createPurchaseForAUser(Long id, Long vehicle_Id) {
+    public PurchaseResponse createPurchaseForAUser(Long id, Long vehicle_Id) {
         Optional<Users> user = userRepository.findById(id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_Id);
         if (!user.isPresent() || !vehicle.isPresent()) {
@@ -509,9 +497,9 @@ public class AdminServices {
         Optional<OrderInfo> order = orderRepository.findByVehicleAndOrderStatus(vehicle.get(),
                 OrderStatus.COMPLETED);
         if (order.isPresent() && order.get().getCustomer().equals(user.get())) {
-            return ResponseEntity.ok(purchaseIfOrderExist(vehicle, order));
+            return purchaseIfOrderExist(vehicle, order);
         } else {
-            return ResponseEntity.ok(purchaseWithoutOrder(user, vehicle));
+            return purchaseWithoutOrder(user, vehicle);
         }
 
     }
@@ -562,7 +550,7 @@ public class AdminServices {
     }
 
     // elimina un acquisto per un utente
-    public ResponseEntity<Void> deletePurchase(Long id) {
+    public boolean deletePurchase(Long id) {
         Optional<PurchaseInfo> optionalPurchase = purchaseRepository.findById(id);
         if (optionalPurchase.isPresent()) {
             PurchaseInfo purchase = optionalPurchase.get();
@@ -575,9 +563,9 @@ public class AdminServices {
                 vehicle.setIsAvailable(VehicleStatus.AVAILABLE);
                 vehicleRepository.save(vehicle);
             }
-            return ResponseEntity.noContent().build();
+            return true;
         }
-        return ResponseEntity.notFound().build();
+        return false;
     }
 
     // modifica un acquisto per un utente
