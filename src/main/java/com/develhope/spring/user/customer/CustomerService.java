@@ -1,15 +1,26 @@
 package com.develhope.spring.user.customer;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.VehicleModel;
 import com.develhope.spring.car.VehicleRepository;
 
 import com.develhope.spring.car.VehicleStatus;
+import com.develhope.spring.car.cardto.VehicleNetworkResponse;
+import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.order.OrderModel;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
+import com.develhope.spring.order.orderdto.OrderNetworkResponse;
+import com.develhope.spring.order.orderdto.OrderRequestRefactor;
+import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
 
+import com.develhope.spring.rent.rentdto.RentNetworkResponse;
+import com.develhope.spring.rent.rentdto.RentRequestRefactor;
+import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.role.RoleRepository;
 import com.develhope.spring.user.UserModel;
@@ -22,12 +33,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
 import static com.develhope.spring.role.Role.RoleType.ROLE_CUSTOMER;
-import static com.develhope.spring.role.Role.RoleType.ROLE_SELLER;
 
 @Service
 public class CustomerService {
@@ -48,12 +58,14 @@ public class CustomerService {
     RoleRepository roleRepository;
 
 
-    public ResponseEntity<?> getVehicle(long idVehicle) {
+    public VehicleNetworkResponse getVehicle(long idVehicle) {
         Optional<Vehicle> vehicleToFind = vehicleRepository.findById(idVehicle);
         if (vehicleToFind.isEmpty()) {
-            return new ResponseEntity<>("Wrong idVehicle", HttpStatus.BAD_REQUEST);
+            return VehicleNetworkResponse.Error.builder().code(400).description("Wrong idVehicle").build();
         } else {
-            return ResponseEntity.ok(vehicleToFind);
+            VehicleModel vehicleModel = VehicleModel.mapEntityToModel(vehicleToFind.get());
+            VehicleResponse vehicleResponse = VehicleModel.mapModelToResponse(vehicleModel);
+            return VehicleNetworkResponse.Success.builder().vehicleResponse(vehicleResponse).build();
         }
     }
 
@@ -89,16 +101,12 @@ public class CustomerService {
     }
 
     public UserNetworkResponse updateCustomerName(Users customer, String newFirstName) {
-        if (newFirstName == null) {
-            return UserNetworkResponse.Error.builder().code(600).description("null value").build();
-        }
-        if (newFirstName.isEmpty()) {
-            return UserNetworkResponse.Error.builder().code(601).description("Empty String").build();
-        }
-        else {
+        if (newFirstName == null || newFirstName.isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(400).description("null value").build();
+        } else {
             customer.setFirstName(newFirstName);
             userRepository.saveAndFlush(customer);
-            UserModel userModel= UserModel.mapEntityToModel(customer);
+            UserModel userModel = UserModel.mapEntityToModel(customer);
             UserResponse userResponse = UserModel.mapModelToResponse(userModel);
             UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
             return response;
@@ -106,22 +114,46 @@ public class CustomerService {
 
     }
 
-    public ResponseEntity<Users> updateLastName(Users customer, String newLastName) {
-        customer.setLastName(newLastName);
-        return ResponseEntity.ok(userRepository.save(customer));
+    public UserNetworkResponse updateLastName(Users customer, String newLastName) {
+        if (newLastName == null || newLastName.isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(400).description("null value").build();
+        } else {
+            customer.setLastName(newLastName);
+            userRepository.saveAndFlush(customer);
+            UserModel userModel = UserModel.mapEntityToModel(customer);
+            UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+            UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
+            return response;
+        }
     }
 
-    public ResponseEntity<Users> updateEmail(Users customer, String newEmail) {
-        customer.setEmail(newEmail);
-        return ResponseEntity.ok(userRepository.save(customer));
+    public UserNetworkResponse updateEmail(Users customer, String newEmail) {
+        if (newEmail == null || newEmail.isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(400).description("null value").build();
+        } else {
+            customer.setLastName(newEmail);
+            userRepository.saveAndFlush(customer);
+            UserModel userModel = UserModel.mapEntityToModel(customer);
+            UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+            UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
+            return response;
+        }
     }
 
-    public ResponseEntity<Users> updateAll(Users customer, Users newCustomer) {
-        customer.setFirstName(newCustomer.getFirstName());
-        customer.setLastName(newCustomer.getLastName());
-        customer.setEmail(newCustomer.getEmail());
-        //customer.setPassword(newCustomer.getPassword());
-        return ResponseEntity.ok(userRepository.save(customer));
+    public UserNetworkResponse updateAll(Users customer, Users newCustomer) {
+        if (newCustomer == null || newCustomer.getFirstName().isEmpty() || newCustomer.getLastName().isEmpty() || newCustomer.getEmail().isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(400).description("null value").build();
+        } else {
+            customer.setFirstName(newCustomer.getFirstName());
+            customer.setLastName(newCustomer.getLastName());
+            customer.setEmail(newCustomer.getEmail());
+            //customer.setPassword(newCustomer.getPassword());
+            userRepository.saveAndFlush(customer);
+            UserModel userModel = UserModel.mapEntityToModel(customer);
+            UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+            UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
+            return response;
+        }
     }
 
    /* public ResponseEntity<Users> updatePassword(Users customer, String newEmail) {
@@ -130,65 +162,83 @@ public class CustomerService {
     }*/
 
 
-    public ResponseEntity<?> createOrder(Users customer, long idSeller, long idVehicle, OrderInfo orderInfo) {
+    public OrderNetworkResponse createOrder(Users customer, OrderRequestRefactor orderRequestRefactor) {
+        System.out.println(orderRequestRefactor);
         Boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
         if (!customerCheck) {
-            return new ResponseEntity<>("This user is not a Customer", HttpStatus.BAD_REQUEST);
+            return OrderNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
         }
 
-        Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
+        if (orderRequestRefactor.getIdVehicle() == null){
+            return OrderNetworkResponse.Error.builder().code(600).description("This vehicle id is null").build();
+        }
+        Optional<Vehicle> vehicle = vehicleRepository.findById(orderRequestRefactor.getIdVehicle());
         boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
         if (!vehicleCheck) {
-            return new ResponseEntity<>("This vehicle is not available", HttpStatus.BAD_REQUEST);
+            return OrderNetworkResponse.Error.builder().code(600).description("This vehicle is not available").build();
         }
 
-        Optional<Users> seller = userRepository.findById(idSeller);
+        if (orderRequestRefactor.getIdCustomer() != null && orderRequestRefactor.getIdSeller() != null) {
+            return OrderNetworkResponse.Error.builder().code(600).description("I can't add this values").build();
+        }
+
+        //If order by Customer, we don't have any Seller
+       /* Optional<Users> seller = userRepository.findById(idSeller);
         Boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
         if (!sellerCheck) {
             return new ResponseEntity<>("This user is not a Seller", HttpStatus.BAD_REQUEST);
-        }
+        } */
 
-        OrderInfo newOrder = new OrderInfo();
-        newOrder.setOrderStatus(OrderStatus.ORDERED);
-        newOrder.setAdvancePayment(orderInfo.getAdvancePayment());
-        newOrder.setPaidInFull(orderInfo.getPaidInFull());
-        newOrder.setCustomer(customer);
-        newOrder.setVehicle(vehicle.get());
-        newOrder.setSeller(seller.get());
-        orderRepository.save(newOrder);
-        return ResponseEntity.ok(newOrder);
+        OrderModel newOrderModel = new OrderModel();
+        newOrderModel.setOrderStatus(OrderStatus.ORDERED);
+        newOrderModel.setAdvancePayment(orderRequestRefactor.getAdvancePayment());
+        newOrderModel.setPaidInFull(orderRequestRefactor.getPaidInFull());
+        newOrderModel.setCustomer(customer);
+        newOrderModel.setVehicle(vehicle.get());
+        newOrderModel.setSeller(null);
+
+        OrderInfo orderEntity = OrderModel.mapModelToEntity(newOrderModel);
+        orderRepository.saveAndFlush(orderEntity);
+        OrderModel orderModel = OrderModel.mapEntityToModel(orderEntity);
+        OrderResponse orderResponse = OrderModel.mapModelToResponse(orderModel);
+        return OrderNetworkResponse.Success.builder().orderResponse(orderResponse).build();
     }
 
 
-    public ResponseEntity<?> createRent(Users customer, long idSeller, long idVehicle, RentInfo rentInfo) {
+    public RentNetworkResponse createRent(Users customer, RentRequestRefactor rentRequest) {
         boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
         if (!customerCheck) {
-            return new ResponseEntity<>("This user is not a Customer", HttpStatus.BAD_REQUEST);
+            return RentNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
         }
 
-        Optional<Vehicle> vehicle = vehicleRepository.findById(idVehicle);
+        Optional<Vehicle> vehicle = vehicleRepository.findById(rentRequest.getIdVehicle());
         boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
         if (!vehicleCheck) {
-            return new ResponseEntity<>("This vehicle is not available", HttpStatus.BAD_REQUEST);
+            return RentNetworkResponse.Error.builder().code(600).description("This vehicle is not available").build();
         }
 
-        Optional<Users> seller = userRepository.findById(idSeller);
+      /*  Optional<Users> seller = userRepository.findById(idSeller);
         Boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
         if (!sellerCheck) {
             return new ResponseEntity<>("This user is not a Seller", HttpStatus.BAD_REQUEST);
-        }
+        } */
 
-        RentInfo newRent = new RentInfo();
-        newRent.setCustomer(customer);
-        newRent.setSeller(seller.get());
-        newRent.setVehicle(vehicle.get());
-        newRent.setStartDate(rentInfo.getStartDate());
-        newRent.setEndDate(rentInfo.getEndDate());
-        newRent.setIsPaid(rentInfo.getIsPaid());
-        newRent.setDailyCost(rentInfo.getDailyCost());
-        newRent.setTotalCost(rentInfo.getTotalCost());
-        rentRepository.saveAndFlush(newRent);
-        return ResponseEntity.ok(newRent);
+        RentModel newModelRent = new RentModel(null,
+                rentRequest.getStartDate(),
+                rentRequest.getEndDate(),
+                rentRequest.getDailyCost(),
+                rentRequest.getTotalCost(),
+                rentRequest.getIsPaid(),
+                vehicle.get(),
+                customer,
+                null);
+
+        RentInfo rentEntity = RentModel.mapModelToEntity(newModelRent);
+        rentRepository.saveAndFlush(rentEntity);
+        RentModel rentModel = RentModel.mapEntityToModel(rentEntity);
+        RentResponse rentResponse = RentModel.mapModelToResponse(rentModel);
+        return RentNetworkResponse.Success.builder().rentResponse(rentResponse).build();
+
     }
 
     public ResponseEntity<?> delete(Users customer) {
@@ -199,22 +249,79 @@ public class CustomerService {
         return ResponseEntity.ok(true);
     }
 
-    public ResponseEntity<?> getVehicleByAttribute(String attributeChoice, String attributeValue) {
-        return switch (attributeChoice) {
-            case "brand" -> ResponseEntity.ok(vehicleRepository.findByBrand(attributeValue));
-            case "model" -> ResponseEntity.ok(vehicleRepository.findByModel(attributeValue));
-            case "color" -> ResponseEntity.ok(vehicleRepository.findByColor(attributeValue));
-            case "gearboxType" -> ResponseEntity.ok(vehicleRepository.findByGearboxType(attributeValue));
-            case "fuelType" -> ResponseEntity.ok(vehicleRepository.findByFuelType(attributeValue));
-            case "accessories" -> ResponseEntity.ok(vehicleRepository.findByAccessories(attributeValue));
-            case "displacement" -> ResponseEntity.ok(vehicleRepository.findByDisplacement(Integer.valueOf(attributeValue)));
-            case "power" -> ResponseEntity.ok(vehicleRepository.findByPower(Integer.valueOf(attributeValue)));
-            case "yearOfRegistration" -> ResponseEntity.ok(vehicleRepository.findByYearOfRegistration(Integer.valueOf(attributeValue)));
-            case "price" -> ResponseEntity.ok(vehicleRepository.findByPrice(Double.valueOf(attributeValue)));
-            case "discount" -> ResponseEntity.ok(vehicleRepository.findByDiscount(Double.valueOf(attributeValue)));
-            case "isNew" -> ResponseEntity.ok(vehicleRepository.findByIsNew(Boolean.valueOf(attributeValue)));
-            default -> null;
-        };
+    public VehicleNetworkResponse getVehicleByAttribute(String attributeChoice, String attributeValue) {
+        if (attributeChoice.isEmpty() || attributeValue.isEmpty()) {
+            return VehicleNetworkResponse.Error.builder().code(400).description("attributes can't be empty").build();
+        } else {
+
+            switch (attributeChoice) {
+                case "brand":
+                    List<Vehicle> vehicleEntities = vehicleRepository.findByBrand(attributeValue);
+                    List<VehicleModel> vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    List<VehicleResponse> vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+
+                case "model":
+                    vehicleEntities = vehicleRepository.findByModel(attributeValue);
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+
+                case "color":
+                    vehicleEntities = vehicleRepository.findByColor(attributeValue);
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+
+                case "gearboxType":
+                    vehicleEntities = vehicleRepository.findByGearboxType(attributeValue);
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "fuelType":
+                    vehicleEntities = vehicleRepository.findByFuelType(attributeValue);
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "accessories":
+                    vehicleEntities = vehicleRepository.findByAccessories(attributeValue);
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "displacement":
+                    vehicleEntities = vehicleRepository.findByDisplacement(Integer.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "power":
+                    vehicleEntities = vehicleRepository.findByPower(Integer.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "yearOfRegistration":
+                    vehicleEntities = vehicleRepository.findByYearOfRegistration(Integer.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "price":
+                    vehicleEntities = vehicleRepository.findByPrice(Double.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "discount":
+                    vehicleEntities = vehicleRepository.findByDiscount(Double.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                case "isNew":
+                    vehicleEntities = vehicleRepository.findByIsNew(Boolean.valueOf(attributeValue));
+                    vehicleModels = VehicleModel.mapEntitiesToModels(vehicleEntities);
+                    vehicleResponses = VehicleModel.mapModelsToResponses(vehicleModels);
+                    return VehicleNetworkResponse.SuccessList.builder().vehicleResponse(vehicleResponses).build();
+                default:
+                    return null;
+            }
+        }
     }
 
 
@@ -251,6 +358,8 @@ public class CustomerService {
         }
         return vehicleCheck;
     }
+
+
 
 
 }

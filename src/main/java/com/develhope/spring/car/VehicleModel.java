@@ -6,6 +6,9 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -108,5 +111,55 @@ public class VehicleModel {
                 );
     }
 
+
+    public static List<VehicleModel> mapEntitiesToModels(List<Vehicle> vehiclesEntities) {
+        List<VehicleModel> vehicleModels = new ArrayList<>();
+        for (Vehicle vehicleEntity : vehiclesEntities) {
+            VehicleModel vehicleModelToAdd = new VehicleModel(
+                    vehicleEntity.getVehicleId(),
+                    vehicleEntity.getBrand(),
+                    vehicleEntity.getModel(),
+                    vehicleEntity.getColor(),
+                    vehicleEntity.getGearboxType(),
+                    vehicleEntity.getFuelType(),
+                    vehicleEntity.getAccessories(),
+                    vehicleEntity.getDisplacement(),
+                    vehicleEntity.getPower(),
+                    vehicleEntity.getYearOfRegistration(),
+                    vehicleEntity.getPrice(),
+                    vehicleEntity.getDiscount(),
+                    vehicleEntity.getIsNew(),
+                    vehicleEntity.getVehicleType(),
+                    vehicleEntity.getIsAvailable()
+            );
+            vehicleModels.add(vehicleModelToAdd);
+        }
+        return vehicleModels;
+    }
+
+    public static List<VehicleResponse> mapModelsToResponses(List<VehicleModel> vehicleModels) {
+        List<VehicleResponse> vehicleResponses = new ArrayList<>();
+        for (VehicleModel vehicleModel : vehicleModels) {
+            VehicleResponse vehicleResponseToAdd = new VehicleResponse(
+                    vehicleModel.getVehicleId(),
+                    vehicleModel.getBrand(),
+                    vehicleModel.getModel(),
+                    vehicleModel.getColor(),
+                    vehicleModel.getGearboxType(),
+                    vehicleModel.getFuelType(),
+                    vehicleModel.getAccessories(),
+                    vehicleModel.getDisplacement(),
+                    vehicleModel.getPower(),
+                    vehicleModel.getYearOfRegistration(),
+                    vehicleModel.getPrice(),
+                    vehicleModel.getDiscount(),
+                    vehicleModel.getIsNew(),
+                    vehicleModel.getVehicleType(),
+                    vehicleModel.getIsAvailable()
+            );
+            vehicleResponses.add(vehicleResponseToAdd);
+        }
+        return vehicleResponses;
+    }
 
 }

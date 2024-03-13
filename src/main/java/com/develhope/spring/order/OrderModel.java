@@ -2,16 +2,26 @@ package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.order.orderdto.OrderRequest;
+import com.develhope.spring.order.orderdto.OrderRequestRefactor;
 import com.develhope.spring.order.orderdto.OrderResponse;
+import com.develhope.spring.user.UserRepository;
 import com.develhope.spring.user.Users;
+import com.develhope.spring.user.customer.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
+
+import java.util.Optional;
+
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderModel {
+
+
     private Long orderId;
     private Double advancePayment;
     private Boolean paidInFull;
@@ -19,6 +29,8 @@ public class OrderModel {
     private Users seller;
     private Vehicle vehicle;
     private OrderStatus orderStatus;
+
+
 
     public static OrderModel mapEntityToModel(OrderInfo orderInfo) {
         return new OrderModel(
@@ -63,5 +75,7 @@ public class OrderModel {
                 orderRequest.getVehicle(),
                 orderRequest.getOrderStatus());
     }
+
+
 
 }
