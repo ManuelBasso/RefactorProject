@@ -1,5 +1,6 @@
 package com.develhope.spring.user.customer;
 
+import ch.qos.logback.classic.encoder.JsonEncoder;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleModel;
 import com.develhope.spring.car.VehicleRepository;
@@ -31,6 +32,7 @@ import com.develhope.spring.user.userdto.UserResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.OffsetDateTime;
@@ -56,6 +58,9 @@ public class CustomerService {
 
     @Autowired
     RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
 
     public VehicleNetworkResponse getVehicle(long idVehicle) {
@@ -140,6 +145,19 @@ public class CustomerService {
         }
     }
 
+    public UserNetworkResponse updatePassword(Users customer, String newPassword) {
+        if (newPassword == null || newPassword.isEmpty()) {
+            return UserNetworkResponse.Error.builder().code(400).description("null value").build();
+        } else {
+            customer.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.saveAndFlush(customer);
+            UserModel userModel = UserModel.mapEntityToModel(customer);
+            UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+            UserNetworkResponse response = UserNetworkResponse.Success.builder().userResponse(userResponse).build();
+            return response;
+        }
+    }
+
     public UserNetworkResponse updateAll(Users customer, Users newCustomer) {
         if (newCustomer == null || newCustomer.getFirstName().isEmpty() || newCustomer.getLastName().isEmpty() || newCustomer.getEmail().isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
@@ -169,25 +187,16 @@ public class CustomerService {
             return OrderNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
         }
 
-        if (orderRequestRefactor.getIdVehicle() == null){
-            return OrderNetworkResponse.Error.builder().code(600).description("This vehicle id is null").build();
-        }
+
         Optional<Vehicle> vehicle = vehicleRepository.findById(orderRequestRefactor.getIdVehicle());
-        boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
+        boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.NOT_AVAILABLE);
         if (!vehicleCheck) {
-            return OrderNetworkResponse.Error.builder().code(600).description("This vehicle is not available").build();
+            return OrderNetworkResponse.Error.builder().code(600).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
 
         if (orderRequestRefactor.getIdCustomer() != null && orderRequestRefactor.getIdSeller() != null) {
-            return OrderNetworkResponse.Error.builder().code(600).description("I can't add this values").build();
+            return OrderNetworkResponse.Error.builder().code(600).description("Customer is not allowed to add this values").build();
         }
-
-        //If order by Customer, we don't have any Seller
-       /* Optional<Users> seller = userRepository.findById(idSeller);
-        Boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
-        if (!sellerCheck) {
-            return new ResponseEntity<>("This user is not a Seller", HttpStatus.BAD_REQUEST);
-        } */
 
         OrderModel newOrderModel = new OrderModel();
         newOrderModel.setOrderStatus(OrderStatus.ORDERED);
@@ -201,7 +210,13 @@ public class CustomerService {
         orderRepository.saveAndFlush(orderEntity);
         OrderModel orderModel = OrderModel.mapEntityToModel(orderEntity);
         OrderResponse orderResponse = OrderModel.mapModelToResponse(orderModel);
-        return OrderNetworkResponse.Success.builder().orderResponse(orderResponse).build();
+        OrderNetworkResponse response = OrderNetworkResponse.Success.builder().orderResponse(orderResponse).build();
+
+        vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
+        vehicleRepository.saveAndFlush(vehicle.get());
+
+        return response;
+
     }
 
 
@@ -214,7 +229,7 @@ public class CustomerService {
         Optional<Vehicle> vehicle = vehicleRepository.findById(rentRequest.getIdVehicle());
         boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
         if (!vehicleCheck) {
-            return RentNetworkResponse.Error.builder().code(600).description("This vehicle is not available").build();
+            return RentNetworkResponse.Error.builder().code(600).description("You can't rent this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
 
       /*  Optional<Users> seller = userRepository.findById(idSeller);

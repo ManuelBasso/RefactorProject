@@ -144,6 +144,20 @@ public class CustomerController {
         }
     }
 
+    //TODO validation using email
+    @PutMapping("/updatePassword")
+    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal Users customer, @RequestParam String password) {
+        UserNetworkResponse response = customerService.updatePassword(customer, password);
+
+        if (response instanceof UserNetworkResponse.Success) {
+            return ResponseEntity.ok(((UserNetworkResponse.Success) response).getUserResponse());
+        } else {
+            int code = ((UserNetworkResponse.Error) response).getCode();
+            String description = ((UserNetworkResponse.Error) response).getDescription();
+            return ResponseEntity.status(code).body(description);
+        }
+    }
+
     @PutMapping("/updateAll")
     public ResponseEntity<?> updateAll(@AuthenticationPrincipal Users customer, @RequestBody Users newCustomer) {
         UserNetworkResponse response = customerService.updateAll(customer, newCustomer);
