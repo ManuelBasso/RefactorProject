@@ -1,13 +1,10 @@
 package com.develhope.spring.user.customer;
 
 import com.develhope.spring.car.cardto.VehicleNetworkResponse;
-import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.order.orderdto.OrderNetworkResponse;
-import com.develhope.spring.order.orderdto.OrderRequestRefactor;
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.order.orderdto.CustomerOrderNetworkResponse;
+import com.develhope.spring.order.orderdto.CustomerOrderRequest;
 import com.develhope.spring.rent.rentdto.RentNetworkResponse;
-import com.develhope.spring.rent.rentdto.RentRequest;
-import com.develhope.spring.rent.rentdto.RentRequestRefactor;
+import com.develhope.spring.rent.rentdto.CustomerRentRequest;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.userdto.UserNetworkResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,16 +27,16 @@ public class CustomerController {
     //Creare un ordine a partire da un veicolo contrassegnato come ordinabile
     //ok
     @PostMapping("/createOrder")
-    public ResponseEntity<?> createOrder(@AuthenticationPrincipal Users customer, @RequestBody OrderRequestRefactor orderRequest) {
-        OrderNetworkResponse response = customerService.createOrder(customer, orderRequest);
+    public ResponseEntity<?> createOrder(@AuthenticationPrincipal Users customer, @RequestBody CustomerOrderRequest orderRequest) {
+        CustomerOrderNetworkResponse response = customerService.createOrder(customer, orderRequest);
 
-        if (response instanceof OrderNetworkResponse.Success) {
-            return ResponseEntity.ok(((OrderNetworkResponse.Success) response).getOrderResponse());
+        if (response instanceof CustomerOrderNetworkResponse.Success) {
+            return ResponseEntity.ok(((CustomerOrderNetworkResponse.Success) response).getOrderResponse());
 
         } else {
 
-            int code = ((OrderNetworkResponse.Error) response).getCode();
-            String description = ((OrderNetworkResponse.Error) response).getDescription();
+            int code = ((CustomerOrderNetworkResponse.Error) response).getCode();
+            String description = ((CustomerOrderNetworkResponse.Error) response).getDescription();
             return ResponseEntity.status(code).body(description);
         }
     }
@@ -82,7 +79,7 @@ public class CustomerController {
     //Creare un noleggio
     //tested: ok
     @PostMapping("/createRent")
-    public ResponseEntity<?> createRent(@AuthenticationPrincipal Users customer, @RequestBody RentRequestRefactor rentRequest) {
+    public ResponseEntity<?> createRent(@AuthenticationPrincipal Users customer, @RequestBody CustomerRentRequest rentRequest) {
         RentNetworkResponse response = customerService.createRent(customer, rentRequest);
         if (response instanceof RentNetworkResponse.Success) {
             return ResponseEntity.ok(((RentNetworkResponse.Success) response).getRentResponse());

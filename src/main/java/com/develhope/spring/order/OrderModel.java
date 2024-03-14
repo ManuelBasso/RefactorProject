@@ -1,19 +1,15 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.VehicleModel;
+import com.develhope.spring.order.orderdto.CustomerOrderResponse;
 import com.develhope.spring.order.orderdto.OrderRequest;
-import com.develhope.spring.order.orderdto.OrderRequestRefactor;
 import com.develhope.spring.order.orderdto.OrderResponse;
-import com.develhope.spring.user.UserRepository;
+import com.develhope.spring.user.UserModel;
 import com.develhope.spring.user.Users;
-import com.develhope.spring.user.customer.CustomerService;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
-
-import java.util.Optional;
 
 
 @Data
@@ -63,6 +59,21 @@ public class OrderModel {
                 orderModel.getSeller(),
                 orderModel.getVehicle(),
                 orderModel.getOrderStatus());
+    }
+
+    public static CustomerOrderResponse mapModelToCustomerOrderResponse(OrderModel orderModel){
+        UserModel userModel = UserModel.mapEntityToModel(orderModel.getCustomer());
+        VehicleModel vehicleModel = VehicleModel.mapEntityToModel(orderModel.getVehicle());
+
+
+        return new CustomerOrderResponse(
+                orderModel.getOrderId(),
+                orderModel.getAdvancePayment(),
+                orderModel.getPaidInFull(),
+                UserModel.mapModelToResponse(userModel),
+                VehicleModel.mapModelToResponse(vehicleModel),
+                orderModel.getOrderStatus()
+        );
     }
 
     public static OrderModel mapRequestToModel(OrderRequest orderRequest) {

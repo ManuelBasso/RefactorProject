@@ -1,6 +1,5 @@
 package com.develhope.spring.user.customer;
 
-import ch.qos.logback.classic.encoder.JsonEncoder;
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleModel;
 import com.develhope.spring.car.VehicleRepository;
@@ -12,15 +11,16 @@ import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderModel;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
-import com.develhope.spring.order.orderdto.OrderNetworkResponse;
-import com.develhope.spring.order.orderdto.OrderRequestRefactor;
-import com.develhope.spring.order.orderdto.OrderResponse;
+import com.develhope.spring.order.orderdto.CustomerOrderResponse;
+import com.develhope.spring.order.orderdto.CustomerOrderNetworkResponse;
+import com.develhope.spring.order.orderdto.CustomerOrderRequest;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
 
+import com.develhope.spring.rent.rentdto.CustomerRentResponse;
 import com.develhope.spring.rent.rentdto.RentNetworkResponse;
-import com.develhope.spring.rent.rentdto.RentRequestRefactor;
+import com.develhope.spring.rent.rentdto.CustomerRentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.role.RoleRepository;
@@ -35,7 +35,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -180,23 +179,19 @@ public class CustomerService {
     }*/
 
 
-    public OrderNetworkResponse createOrder(Users customer, OrderRequestRefactor orderRequestRefactor) {
+    public CustomerOrderNetworkResponse createOrder(Users customer, CustomerOrderRequest orderRequestRefactor) {
         System.out.println(orderRequestRefactor);
         Boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
         if (!customerCheck) {
-            return OrderNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
+            return CustomerOrderNetworkResponse.Error.builder().code(600).description("This user doesn't exist or is not a customer").build();
         }
-
 
         Optional<Vehicle> vehicle = vehicleRepository.findById(orderRequestRefactor.getIdVehicle());
         boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.NOT_AVAILABLE);
         if (!vehicleCheck) {
-            return OrderNetworkResponse.Error.builder().code(600).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
+            return CustomerOrderNetworkResponse.Error.builder().code(600).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
 
-        if (orderRequestRefactor.getIdCustomer() != null && orderRequestRefactor.getIdSeller() != null) {
-            return OrderNetworkResponse.Error.builder().code(600).description("Customer is not allowed to add this values").build();
-        }
 
         OrderModel newOrderModel = new OrderModel();
         newOrderModel.setOrderStatus(OrderStatus.ORDERED);
@@ -209,8 +204,8 @@ public class CustomerService {
         OrderInfo orderEntity = OrderModel.mapModelToEntity(newOrderModel);
         orderRepository.saveAndFlush(orderEntity);
         OrderModel orderModel = OrderModel.mapEntityToModel(orderEntity);
-        OrderResponse orderResponse = OrderModel.mapModelToResponse(orderModel);
-        OrderNetworkResponse response = OrderNetworkResponse.Success.builder().orderResponse(orderResponse).build();
+        CustomerOrderResponse orderResponse = OrderModel.mapModelToCustomerOrderResponse(orderModel);
+        CustomerOrderNetworkResponse response = CustomerOrderNetworkResponse.Success.builder().orderResponse(orderResponse).build();
 
         vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
         vehicleRepository.saveAndFlush(vehicle.get());
@@ -220,7 +215,7 @@ public class CustomerService {
     }
 
 
-    public RentNetworkResponse createRent(Users customer, RentRequestRefactor rentRequest) {
+    public RentNetworkResponse createRent(Users customer, CustomerRentRequest rentRequest) {
         boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
         if (!customerCheck) {
             return RentNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
@@ -232,11 +227,6 @@ public class CustomerService {
             return RentNetworkResponse.Error.builder().code(600).description("You can't rent this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
 
-      /*  Optional<Users> seller = userRepository.findById(idSeller);
-        Boolean sellerCheck = checkRoleUser(seller, ROLE_SELLER);
-        if (!sellerCheck) {
-            return new ResponseEntity<>("This user is not a Seller", HttpStatus.BAD_REQUEST);
-        } */
 
         RentModel newModelRent = new RentModel(null,
                 rentRequest.getStartDate(),
@@ -251,7 +241,7 @@ public class CustomerService {
         RentInfo rentEntity = RentModel.mapModelToEntity(newModelRent);
         rentRepository.saveAndFlush(rentEntity);
         RentModel rentModel = RentModel.mapEntityToModel(rentEntity);
-        RentResponse rentResponse = RentModel.mapModelToResponse(rentModel);
+        CustomerRentResponse rentResponse = RentModel.mapModelToCustomerRentResponse(rentModel);
         return RentNetworkResponse.Success.builder().rentResponse(rentResponse).build();
 
     }

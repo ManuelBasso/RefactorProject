@@ -1,9 +1,12 @@
 package com.develhope.spring.rent;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.rent.rentdto.CustomerRentResponse;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
+import com.develhope.spring.user.UserModel;
 import com.develhope.spring.user.Users;
+import com.develhope.spring.user.userdto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -63,6 +66,23 @@ public class RentModel {
                 rentModel.getSeller()
         );
     }
+    public static CustomerRentResponse mapModelToCustomerRentResponse(RentModel rentModel) {
+        UserModel userModel = UserModel.mapEntityToModel(rentModel.getCustomer());
+        UserResponse userResponse = UserModel.mapModelToResponse(userModel);
+
+        return new CustomerRentResponse(
+                rentModel.getRentId(),
+                rentModel.getStartDate(),
+                rentModel.getEndDate(),
+                rentModel.getDailyCost(),
+                rentModel.getTotalCost(),
+                rentModel.getIsPaid(),
+                rentModel.getVehicle(),
+                userResponse
+        );
+    }
+
+
     public static RentModel mapRequestToModel(RentRequest rentRequest){
         return new RentModel(
                 null,
