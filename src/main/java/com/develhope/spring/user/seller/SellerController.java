@@ -9,6 +9,7 @@ import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentService;
 
+import com.develhope.spring.user.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -58,9 +60,9 @@ public class SellerController {
                         @ApiResponse(responseCode = "200", description = "Order created"),
                         @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
                         @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
-        @PostMapping("/createorder/{vehicleId}")
-        public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
-                return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
+        @PostMapping("/createorder/{customerId}/{vehicleId}")
+        public ResponseEntity<String> createOrder(@AuthenticationPrincipal Users seller, @PathVariable Long customerId, @PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
+                return sellerService.createOrderOfAvailableVehicle(seller, customerId, vehicleId, newOrder);
         }
 
         // tested: ok
@@ -96,7 +98,7 @@ public class SellerController {
                         @ApiResponse(responseCode = "400", description = "Invalid order ID supplied"),
                         @ApiResponse(responseCode = "404", description = "No order with that ID") })
         @GetMapping("/orderstatus/{orderId}")
-        public @ResponseBody OrderStatus getOrderStatus(@PathVariable Long orderId) {
+        public ResponseEntity<String> getOrderStatus(@PathVariable Long orderId) {
                 return sellerService.getOrderStatus(orderId);
         }
 
@@ -108,7 +110,7 @@ public class SellerController {
                         @ApiResponse(responseCode = "400", description = "Invalid order ID or order status supplied"),
                         @ApiResponse(responseCode = "404", description = "No order with that ID or invalid order status") })
         @PatchMapping("/updateorderstatus/{orderId}/{newStatus}")
-        public OrderInfo updateOrderStatus(@PathVariable Long orderId, @PathVariable OrderStatus newStatus) {
+        public ResponseEntity<String> updateOrderStatus(@PathVariable Long orderId, @PathVariable String newStatus) {
                 return sellerService.updateOrderStatus(orderId, newStatus);
         }
 

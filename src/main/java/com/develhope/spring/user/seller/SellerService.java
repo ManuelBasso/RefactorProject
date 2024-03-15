@@ -7,12 +7,16 @@ import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 
+import com.develhope.spring.role.Role;
+import com.develhope.spring.user.UserRepository;
+import com.develhope.spring.user.Users;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.EnumSet;
 import java.util.Optional;
 
 @Service
@@ -24,6 +28,9 @@ public class SellerService {
     @Autowired
     private VehicleRepository vehicleRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
     public Optional<Vehicle> getOneVehicleById(Long id) {
         return vehicleRepository.findById(id);
     }
@@ -32,14 +39,22 @@ public class SellerService {
         return orderRepository.getById(id);
     }
 
-    public ResponseEntity<String> createOrderOfAvailableVehicle(Long vehicleId, OrderInfo order) {
+    public ResponseEntity<String> createOrderOfAvailableVehicle(Users seller, Long customerId, Long vehicleId, OrderInfo order) {
         try {
             Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
-            if (vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
+            Optional<Users> supposedCustomer = userRepository.findById(customerId);
+            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.ROLE_CUSTOMER);
+
+            if (supposedCustomer.isEmpty() || !checkCustomer){
+                return ResponseEntity.status(HttpStatusCode.valueOf(403)).body("Invalid customer ID");
+            } else if(vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
                 OrderInfo newOrder = new OrderInfo();
                 newOrder.setAdvancePayment(order.getAdvancePayment());
                 newOrder.setPaidInFull(order.getPaidInFull());
                 newOrder.setOrderStatus(order.getOrderStatus());
+                newOrder.setCustomer(supposedCustomer.get());
+                newOrder.setSeller(seller);
+                newOrder.setVehicle(vehicleToOrder.get());
                 vehicleToOrder.get().setIsAvailable(VehicleStatus.NOT_AVAILABLE);
                 orderRepository.save(newOrder);
                 return ResponseEntity.ok("Order placed successfully");
@@ -59,23 +74,36 @@ public class SellerService {
         if (orderToModify != null) {
             orderToModify.setAdvancePayment(newOrder.getAdvancePayment());
             orderToModify.setPaidInFull(newOrder.getPaidInFull());
+            orderToModify.setOrderStatus(newOrder.getOrderStatus());
             orderRepository.save(orderToModify);
             return orderToModify;
         }
         return null;
     }
 
-    public OrderStatus getOrderStatus(Long orderId) {
-        return orderRepository.getById(orderId).getOrderStatus();
+    public ResponseEntity<String> getOrderStatus(Long orderId) {
+        Optional<OrderInfo> checkOrder = orderRepository.findById(orderId);
+        if(checkOrder.isEmpty()){
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Order with ID[" +orderId +"] doesn't exist");
+        }
+        return ResponseEntity.ok("The status of order ID[" +orderId +"] is [" +checkOrder.get().getOrderStatus() +"]");
     }
 
-    public OrderInfo updateOrderStatus(Long orderId, OrderStatus newOrderStatus) {
+    public ResponseEntity<String> updateOrderStatus(Long orderId, String newOrderStatus) {
         OrderInfo orderToUpdateStatus = orderRepository.getById(orderId);
-        if (EnumUtils.isValidEnum(OrderStatus.class, newOrderStatus.toString())) {
-            orderToUpdateStatus.setOrderStatus(newOrderStatus);
-            orderRepository.save(orderToUpdateStatus);
+        boolean checkStatus = EnumUtils.isValidEnum(OrderStatus.class, newOrderStatus);
+        if(!checkStatus){
+            return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("[" +newOrderStatus +"] is not a valid Order status");
         }
-        return orderToUpdateStatus;
+        OrderStatus status = orderRepository.getById(orderId).getOrderStatus();
+        if(orderToUpdateStatus == null){
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Order with ID[" +orderId +"] doesn't exist");
+        } else if (EnumUtils.isValidEnum(OrderStatus.class, newOrderStatus.toString())) {
+            orderToUpdateStatus.setOrderStatus(status);
+            orderRepository.save(orderToUpdateStatus);
+            return ResponseEntity.ok("Status changed successfully");
+        }
+        return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong");
     }
 
     /*
@@ -102,4 +130,18 @@ public class SellerService {
      * }
      * }
      */
+
+    //Utilities
+
+    public Boolean checkRole(Optional<Users> user, Role.RoleType roleUser) {
+        boolean check = false;
+        if (user.isPresent()) {
+            for (Role role : user.get().getRole()) {
+                if (role.getName().equals(roleUser)) {
+                    check = true;
+                }
+            }
+        }
+        return check;
+    }
 }
