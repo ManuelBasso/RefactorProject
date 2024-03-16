@@ -7,6 +7,11 @@ import com.develhope.spring.order.OrderInfo;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 
+import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.RentModel;
+import com.develhope.spring.rent.RentRepository;
+import com.develhope.spring.rent.rentdto.RentRequest;
+import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.user.UserRepository;
 import com.develhope.spring.user.Users;
@@ -16,7 +21,8 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.EnumSet;
+import java.time.Duration;
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 @Service
@@ -24,6 +30,9 @@ public class SellerService {
 
     @Autowired
     private OrderRepository orderRepository;
+
+    @Autowired
+    private RentRepository rentRepository;
 
     @Autowired
     private VehicleRepository vehicleRepository;
@@ -60,25 +69,23 @@ public class SellerService {
                 return ResponseEntity.ok("Order placed successfully");
             } else if (vehicleToOrder.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
                 return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not available");
-            } else if (vehicleToOrder.isEmpty()) {
-                return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("There's no vehicle with that ID");
             }
             return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong in the function body");
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong. Exception launched.");
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Vehicle with ID[" +vehicleId +"] doesn't exist");
         }
     }
 
-    public OrderInfo modifyOrder(Long orderId, OrderInfo newOrder) {
+    public ResponseEntity<String> modifyOrder(Long orderId, OrderInfo newOrder) {
         OrderInfo orderToModify = orderRepository.getById(orderId);
         if (orderToModify != null) {
             orderToModify.setAdvancePayment(newOrder.getAdvancePayment());
             orderToModify.setPaidInFull(newOrder.getPaidInFull());
             orderToModify.setOrderStatus(newOrder.getOrderStatus());
             orderRepository.save(orderToModify);
-            return orderToModify;
+            return ResponseEntity.ok("Order modified successfully!");
         }
-        return null;
+        return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Vehicle with ID[" +orderId +"] doesn't exist");
     }
 
     public ResponseEntity<String> getOrderStatus(Long orderId) {
@@ -106,30 +113,70 @@ public class SellerService {
         return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong");
     }
 
-    /*
-     * public OrderInfo setOrderStatusToDelivered(Long orderId, Enum<OrderStatus>
-     * newOrderStatus){
-     * OrderInfo order = orderRepository.getById(orderId);
-     * if(newOrderStatus.equals(OrderStatus.DELIVERED)) {
-     * order.setOrderStatus(newOrderStatus);
-     * return orderRepository.save(order);
-     * }else {
-     * return order;
-     * }
-     * }
-     */
+    public ResponseEntity<String> findOrdersByStatus(String stringStatus) {
+        boolean checkStatus = EnumUtils.isValidEnum(OrderStatus.class, stringStatus);
+        if(!checkStatus){
+            return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("[" +stringStatus +"] is not a valid Order status");
+        }
+        OrderStatus status = OrderStatus.valueOf(stringStatus);
+        return ResponseEntity.ok("All [" +status +"] orders are: \n" +orderRepository.findByOrderStatus(status));
+    }
 
-    /*
-     * public List<OrderInfo> getAllOrdersByStatus(String orderStatus){ //Da capire
-     * come fare loop sul repo
-     * if (EnumUtils.isValidEnum(OrderStatus.class, orderStatus)) {
-     * ArrayList<OrderInfo> sortedOrders = new ArrayList<>();
-     * for (OrderInfo order : orderRepository) {
-     * sortedOrders.add(order);
-     * }
-     * }
-     * }
-     */
+    public ResponseEntity<String> createRent(Users seller, Long customerId, Long vehicleId, RentInfo newRentOrder) {
+        try {
+            Optional<Vehicle> vehicleToRent = vehicleRepository.findById(vehicleId);
+            Optional<Users> supposedCustomer = userRepository.findById(customerId);
+            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.ROLE_CUSTOMER);
+
+            if (supposedCustomer.isEmpty() || !checkCustomer){
+                return ResponseEntity.status(HttpStatusCode.valueOf(403)).body("Invalid customer ID");
+            } else if(vehicleToRent.isPresent() && vehicleToRent.get().getIsAvailable() == VehicleStatus.RENTABLE) {
+                RentRequest newRentRequest = new RentRequest();
+                newRentRequest.setVehicle(vehicleToRent.get());
+                newRentRequest.setCustomer(supposedCustomer.get());
+                newRentRequest.setSeller(seller);
+                newRentRequest.setStartDate(newRentOrder.getStartDate());
+                newRentRequest.setEndDate(newRentOrder.getEndDate());
+                newRentRequest.setDailyCost(newRentRequest.getDailyCost());
+                newRentRequest.setIsPaid(false);
+                vehicleToRent.get().setIsAvailable(VehicleStatus.RENTED);
+
+                String startDate = newRentOrder.getStartDate();
+                String endDate = newRentOrder.getEndDate();
+                Double dailyCost = newRentOrder.getDailyCost();
+                newRentRequest.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
+
+                RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
+                RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+                RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+
+                return ResponseEntity.ok("Rent order placed successfully\n" +rentResponse);
+            } else if (vehicleToRent.get().getIsAvailable() != VehicleStatus.RENTABLE) {
+                return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("This vehicle is not rentable");
+            }
+            return ResponseEntity.status(HttpStatusCode.valueOf(400)).body("Something went wrong in the function body");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Vehicle with ID[" +vehicleId +"] doesn't exist");
+        }
+    }
+
+    public ResponseEntity<String> updateRent(Long rentId, RentInfo updatedRentOrder) {
+        RentInfo rentToModify = rentRepository.getById(rentId);
+        if (rentToModify != null) {
+            RentRequest newRentRequest = new RentRequest();
+            newRentRequest.setStartDate(updatedRentOrder.getStartDate());
+            newRentRequest.setEndDate(updatedRentOrder.getEndDate());
+            newRentRequest.setDailyCost(newRentRequest.getDailyCost());
+            newRentRequest.setIsPaid(false);
+
+            RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
+            RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+            return ResponseEntity.ok("Rent modified successfully!/n" +rentResponse);
+        }
+        return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Rent order with ID[" +rentId +"] doesn't exist");
+    }
+
 
     //Utilities
 
@@ -143,5 +190,15 @@ public class SellerService {
             }
         }
         return check;
+    }
+
+    private Double calculateTotalCost(String startDate, String endDate, Double dailyCost) {
+        OffsetDateTime rentStartDate = OffsetDateTime.parse(startDate);
+        OffsetDateTime rentEndDate = OffsetDateTime.parse(endDate);
+
+        Duration duration = Duration.between(rentStartDate, rentEndDate);
+        long rentalDays = duration.toDays();
+
+        return rentalDays * dailyCost;
     }
 }
