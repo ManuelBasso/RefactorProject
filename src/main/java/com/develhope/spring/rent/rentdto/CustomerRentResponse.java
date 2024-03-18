@@ -1,6 +1,7 @@
 package com.develhope.spring.rent.rentdto;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.userdto.UserResponse;
 import lombok.AllArgsConstructor;
@@ -19,7 +20,7 @@ public class CustomerRentResponse {
     private Double dailyCost;
     private Double totalCost;
     private Boolean isPaid;
-    private Vehicle vehicle;
+    private VehicleResponse vehicle;
     private UserResponse customer;
 
 }

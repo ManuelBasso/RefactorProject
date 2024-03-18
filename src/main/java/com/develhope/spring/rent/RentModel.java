@@ -1,6 +1,8 @@
 package com.develhope.spring.rent;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.VehicleModel;
+import com.develhope.spring.car.cardto.VehicleResponse;
 import com.develhope.spring.rent.rentdto.CustomerRentResponse;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
@@ -70,6 +72,9 @@ public class RentModel {
         UserModel userModel = UserModel.mapEntityToModel(rentModel.getCustomer());
         UserResponse userResponse = UserModel.mapModelToResponse(userModel);
 
+        VehicleModel vehicleModel = VehicleModel.mapEntityToModel(rentModel.getVehicle());
+        VehicleResponse vehicleResponse = VehicleModel.mapModelToResponse(vehicleModel);
+
         return new CustomerRentResponse(
                 rentModel.getRentId(),
                 rentModel.getStartDate(),
@@ -77,7 +82,7 @@ public class RentModel {
                 rentModel.getDailyCost(),
                 rentModel.getTotalCost(),
                 rentModel.getIsPaid(),
-                rentModel.getVehicle(),
+                vehicleResponse,
                 userResponse
         );
     }
