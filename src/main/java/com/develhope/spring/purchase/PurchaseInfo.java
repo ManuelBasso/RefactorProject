@@ -17,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Data
 @Table(name = "purchases")
@@ -30,6 +32,9 @@ public class PurchaseInfo {
 
     private Double totalPrice;
 
+    //aggiugniamo qui una data che indica il giorno di acquisto
+    private OffsetDateTime purchaseDate;
+
     @OneToOne
     private OrderInfo order;
 
@@ -40,4 +45,8 @@ public class PurchaseInfo {
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private Users seller;
 }

@@ -1,14 +1,5 @@
 package com.develhope.spring.user.admin;
 
-import java.time.Duration;
-import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import com.develhope.spring.car.Vehicle;
 import com.develhope.spring.car.VehicleModel;
 import com.develhope.spring.car.VehicleRepository;
@@ -33,8 +24,19 @@ import com.develhope.spring.rent.RentRepository;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role.RoleType;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.UserModel;
 import com.develhope.spring.user.UserRepository;
+import com.develhope.spring.user.Users;
+import com.develhope.spring.user.userdto.UserRequest;
+import com.develhope.spring.user.userdto.UserResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.time.Duration;
+import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AdminServices {
@@ -188,12 +190,13 @@ public class AdminServices {
     }
 
     // creazione ordine per un utente tramite id
-    public OrderResponse createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
+    public OrderResponse createOrderForAUser(Long user_id, Long vehicle_id, Long seller_id, boolean advance)
             throws OrderRentCreationException {
+        Optional<Users> seller = userRepository.findById(seller_id);
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
-        if (!user.isPresent() || !vehicle.isPresent()) {
-            throw new OrderRentCreationException("Invalid user or vehicle ID");
+        if (!user.isPresent() || !vehicle.isPresent() || !seller.isPresent()) {
+            throw new OrderRentCreationException("Invalid user/seller/vehicle ID");
         }
         if (vehicle.get().getIsAvailable() != VehicleStatus.AVAILABLE) {
             throw new OrderRentCreationException("Vehicle is not available for order");
@@ -207,6 +210,8 @@ public class AdminServices {
         newOrderRequest.setPaidInFull(false);
         newOrderRequest.setCustomer(user.get());
         newOrderRequest.setOrderStatus(OrderStatus.INCOMPLETE);
+        //aggiungiamo il seller_id su questo metodo
+        newOrderRequest.setSeller(seller.get());
         try {
             vehicle.get().setIsAvailable(VehicleStatus.ORDERED);
             vehicleRepository.save(vehicle.get());
@@ -250,7 +255,7 @@ public class AdminServices {
 
     // modifica di un ordine
     public OrderResponse modifyOrderBy(Long id, String choice, OrderRequest orderRequest,
-            Long customerId, Long sellerId, Long vehicleId) {
+                                       Long customerId, Long sellerId, Long vehicleId) {
         Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
             OrderInfo orderRequestEntity = optionalOrder.get();
@@ -330,8 +335,8 @@ public class AdminServices {
 
     // creazione noleggio per un utente tramite id
     public RentResponse createRentForAUser(Long user_id, Long vehicle_id, String startDate,
-            String endDate,
-            Double dailyCost) throws OrderRentCreationException {
+                                           String endDate,
+                                           Double dailyCost) throws OrderRentCreationException {
         Optional<Users> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
@@ -399,7 +404,7 @@ public class AdminServices {
 
     // modifica di un noleggio
     public RentResponse modifyRentById(Long id, String choice, RentRequest rentRequest, Long customerId,
-            Long vehicleId, Long sellerId) {
+                                       Long vehicleId, Long sellerId) {
         Optional<RentInfo> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
 
@@ -483,8 +488,9 @@ public class AdminServices {
     }
 
     // crea un acquisto per un utente
-    public PurchaseResponse createPurchaseForAUser(Long id, Long vehicle_Id) {
+    public PurchaseResponse createPurchaseForAUser(Long id, Long vehicle_Id, Long seller_Id) {
         Optional<Users> user = userRepository.findById(id);
+        Optional<Users> seller = userRepository.findById(seller_Id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_Id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -496,19 +502,24 @@ public class AdminServices {
 
         Optional<OrderInfo> order = orderRepository.findByVehicleAndOrderStatus(vehicle.get(),
                 OrderStatus.COMPLETED);
-        if (order.isPresent() && order.get().getCustomer().equals(user.get())) {
+        if (order.isPresent() && order.get().getCustomer().equals(user.get()) && order.get().getSeller().equals(seller.get())) {
             return purchaseIfOrderExist(vehicle, order);
         } else {
-            return purchaseWithoutOrder(user, vehicle);
+            return purchaseWithoutOrder(user, vehicle, seller);
         }
 
     }
 
-    private PurchaseResponse purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle) {
+    private PurchaseResponse purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle, Optional<Users> seller) {
         PurchaseRequest newPurchaseRequest = new PurchaseRequest();
         newPurchaseRequest.setCustomer(user.get());
         newPurchaseRequest.setVehicle(vehicle.get());
         newPurchaseRequest.setTotalPrice(vehicle.get().getPrice());
+        //inseriamo il seller
+        newPurchaseRequest.setSeller(seller.get());
+
+        //Inserito parametro con data acquisto
+        newPurchaseRequest.setPurchaseDate(OffsetDateTime.now().toString());
 
         PurchaseModel newPurchaseModel = PurchaseModel.mapRequestToModel(newPurchaseRequest);
         try {
@@ -526,12 +537,17 @@ public class AdminServices {
         }
     }
 
+
     public PurchaseResponse purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<OrderInfo> order) {
         PurchaseRequest purchaseRequest = new PurchaseRequest();
         purchaseRequest.setCustomer(order.get().getCustomer());
         purchaseRequest.setVehicle(order.get().getVehicle());
         purchaseRequest.setTotalPrice(vehicle.get().getPrice() - order.get().getAdvancePayment());
         purchaseRequest.setOrder(order.get());
+        //Inserimento ID Seller
+        purchaseRequest.setSeller(order.get().getSeller());
+        //Inserito parametro con data acquisto
+        purchaseRequest.setPurchaseDate(OffsetDateTime.now().toString());
 
         PurchaseModel newPurchaseModel = PurchaseModel.mapRequestToModel(purchaseRequest);
         try {
@@ -548,6 +564,7 @@ public class AdminServices {
             throw new OrderRentCreationException("Failed to create purchase with order");
         }
     }
+
 
     // elimina un acquisto per un utente
     public boolean deletePurchase(Long id) {
@@ -568,24 +585,134 @@ public class AdminServices {
         return false;
     }
 
-    // modifica un acquisto per un utente
-    // public ResponseEntity<Object> modifyPurchaseById(Long id, Long userId, String
-    // choice, PurchaseInfo purchase) {
-    // switch (choice) {
-    // case "totalPrice":
 
-    // break;
-    // case "customer":
+//OK
+    //tutte le vendite di un seller, accetta date in ingresso A e B
+    public List<PurchaseResponse> getPurchaseBySellerInDate(OffsetDateTime startDate,OffsetDateTime endDate,Long seller_Id) {
+        List<PurchaseInfo> response = purchaseRepository.findPurchasesBetweenDates(startDate, endDate, seller_Id);
+        List<PurchaseResponse> result = new ArrayList<>();
+        for (PurchaseInfo purchase : response) {
+            PurchaseModel purchaseModel = PurchaseModel.mapEntityToModel(purchase);
+            result.add(PurchaseModel.mapModelToResponse(purchaseModel));
+        }
+        return result;
+    }
 
-    // break;
+    //solo cashOut For Purchase by seller_id
+    public Double getPurchaseBySellerInDateCashOut(OffsetDateTime startDate, OffsetDateTime endDate, Long sellerId) {
+        return purchaseRepository.cashOutForSellerInDate(startDate, endDate, sellerId);
+    }
 
-    // case "vehicle":
+/*
+    //cashOut for Purchase and Rent by seller_id
+    public Double getCashOutBySellerInDate(OffsetDateTime startDate, OffsetDateTime endDate, Long sellerId) {
+        Double rentCashOut = rentRepository.cashOutForSellerInDateRent(startDate, endDate, sellerId);
+        Double purchaseCashOut = purchaseRepository.cashOutForSellerInDate(startDate, endDate, sellerId);
 
-    // break;
+        if (rentCashOut == null && purchaseCashOut == null) {
+            return null; // Nessun cash-out per il venditore nel periodo specificato
+        }
 
-    // default:
-    // break;
-    // }
-    // }
+        // Somma i risultati delle due query
+        Double totalCashOut = (rentCashOut != null ? rentCashOut : 0) + (purchaseCashOut != null ? purchaseCashOut : 0);
 
+        return totalCashOut;
+    }
+    */
+    //Elimina un utente
+    public boolean deleteUserById(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    //modifica un utente
+    public UserResponse modifyUserById(Long id, UserRequest userRequest, String choice) {
+        Optional<Users> optionalUsers = userRepository.findById(id);
+        if (optionalUsers.isPresent()) {
+            Users userRequestEntity = optionalUsers.get();
+            switch (choice) {
+                case "email":
+                    userRequest.setEmail(userRequest.getEmail());
+                    break;
+                case "role":
+                    userRequest.setRole(userRequest.getRole());
+                    break;
+                case "firstName":
+                    userRequest.setFirstName(userRequest.getFirstName());
+                    break;
+                case "lastName":
+                    userRequest.setLastName(userRequest.getLastName());
+                    break;
+                case "Password":
+                    userRequest.setPassword(userRequest.getPassword());
+                    break;
+                case "all":
+                    userRequest.setEmail(userRequest.getEmail());
+                    userRequest.setRole(userRequest.getRole());
+                    userRequest.setFirstName(userRequest.getFirstName());
+                    userRequest.setLastName(userRequest.getLastName());
+                    //Chiedere per Trasformare la password il metodo
+                    userRequest.setPassword(userRequest.getPassword());
+                    break;
+            }
+            Users modifiedUser = userRepository.saveAndFlush(userRequestEntity);
+            UserModel modifiedRentModel = UserModel.mapEntityToModel(modifiedUser);
+            UserResponse userResponse = UserModel.mapModelToResponse(modifiedRentModel);
+
+            return userResponse;
+        }
+        return null;
+    }
+
+    //Elimina un seller
+    public boolean deleteSellerById(Long id) {
+        if (userRepository.existsById(id)) {
+            userRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    //modifica un utente
+    public UserResponse modifySellerById(Long id, UserRequest sellerRequest, String choice) {
+        Optional<Users> optionalUsers = userRepository.findById(id);
+        if (optionalUsers.isPresent()) {
+            Users sellerRequestEntity = optionalUsers.get();
+            switch (choice) {
+                case "email":
+                    sellerRequest.setEmail(sellerRequest.getEmail());
+                    break;
+                case "role":
+                    sellerRequest.setRole(sellerRequest.getRole());
+                    break;
+                case "firstName":
+                    sellerRequest.setFirstName(sellerRequest.getFirstName());
+                    break;
+                case "lastName":
+                    sellerRequest.setLastName(sellerRequest.getLastName());
+                    break;
+                case "Password":
+                    sellerRequest.setPassword(sellerRequest.getPassword());
+                    break;
+                case "all":
+                    sellerRequest.setEmail(sellerRequest.getEmail());
+                    sellerRequest.setRole(sellerRequest.getRole());
+                    sellerRequest.setFirstName(sellerRequest.getFirstName());
+                    sellerRequest.setLastName(sellerRequest.getLastName());
+
+                    //Chiedere per Trasformare la password il metodo
+                    sellerRequest.setPassword(sellerRequest.getPassword());
+                    break;
+            }
+            Users modifiedSeller = userRepository.saveAndFlush(sellerRequestEntity);
+            UserModel modifiedRentModel = UserModel.mapEntityToModel(modifiedSeller);
+            UserResponse sellerResponse = UserModel.mapModelToResponse(modifiedRentModel);
+
+            return sellerResponse;
+        }
+        return null;
+    }
 }

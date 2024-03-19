@@ -6,6 +6,9 @@ import com.develhope.spring.user.Users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.apache.catalina.User;
+
+import java.time.OffsetDateTime;
 
 @Data
 @NoArgsConstructor
@@ -16,4 +19,7 @@ public class PurchaseResponse {
     private OrderInfo order;
     private Users customer;
     private Vehicle vehicle;
+    private Users seller;
+
+    private String purchaseDate;
 }

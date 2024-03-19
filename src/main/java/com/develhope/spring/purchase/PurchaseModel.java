@@ -9,6 +9,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.OffsetDateTime;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,6 +21,10 @@ public class PurchaseModel {
     private OrderInfo order;
     private Users customer;
     private Vehicle vehicle;
+    private Users seller;
+
+    //Inseriamo qui la variabile data di acquisto
+    private OffsetDateTime purchaseDate;
 
     public static PurchaseModel mapEntityToModel(PurchaseInfo purchaseInfo){
         return new PurchaseModel(
@@ -26,17 +32,21 @@ public class PurchaseModel {
                 purchaseInfo.getTotalPrice(),
                 purchaseInfo.getOrder(),
                 purchaseInfo.getCustomer(),
-                purchaseInfo.getVehicle()
+                purchaseInfo.getVehicle(),
+                purchaseInfo.getSeller(),
+                purchaseInfo.getPurchaseDate()
         );
     }
     public static PurchaseInfo mapModelToEntity(PurchaseModel purchaseModel){
         return new PurchaseInfo(
                 purchaseModel.getPurchaseId(),
                 purchaseModel.getTotalPrice(),
+                purchaseModel.getPurchaseDate(),
                 purchaseModel.getOrder(),
                 purchaseModel.getCustomer(),
-                purchaseModel.getVehicle()
-        );
+                purchaseModel.getVehicle(),
+                purchaseModel.getSeller()
+                );
     }
     public static PurchaseResponse mapModelToResponse(PurchaseModel purchaseModel){
         return new PurchaseResponse(
@@ -44,7 +54,9 @@ public class PurchaseModel {
                 purchaseModel.getTotalPrice(),
                 purchaseModel.getOrder(),
                 purchaseModel.getCustomer(),
-                purchaseModel.getVehicle()
+                purchaseModel.getVehicle(),
+                purchaseModel.getSeller(),
+                purchaseModel.getPurchaseDate() == null ? "" : purchaseModel.getPurchaseDate().toString()
         );
     }
     public static PurchaseModel mapRequestToModel(PurchaseRequest purchaseRequest){
@@ -53,7 +65,10 @@ public class PurchaseModel {
                 purchaseRequest.getTotalPrice(),
                 purchaseRequest.getOrder(),
                 purchaseRequest.getCustomer(),
-                purchaseRequest.getVehicle()
+                purchaseRequest.getVehicle(),
+                purchaseRequest.getSeller(),
+                OffsetDateTime.parse(purchaseRequest.getPurchaseDate())
+
         );
     }
 }

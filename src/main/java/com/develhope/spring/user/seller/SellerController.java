@@ -9,6 +9,7 @@ import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.rent.RentInfo;
 import com.develhope.spring.rent.RentService;
 
+import com.develhope.spring.user.Users;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -17,6 +18,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -53,11 +55,11 @@ public class SellerController {
 
         // tested: create order but without userId, should we pass idUser too????
         @Operation(summary = "Create order.", description = "Create an order for a vehicle, if it is available, by specifying order details and vehicle ID", tags = {
-                        "seller", "create", "order" })
+                "seller", "create", "order" })
         @ApiResponses(value = {
-                        @ApiResponse(responseCode = "200", description = "Order created"),
-                        @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
-                        @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
+                @ApiResponse(responseCode = "200", description = "Order created"),
+                @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
+                @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
         @PostMapping("/createorder/{vehicleId}")
         public ResponseEntity<String> createOrder(@PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
                 return sellerService.createOrderOfAvailableVehicle(vehicleId, newOrder);
