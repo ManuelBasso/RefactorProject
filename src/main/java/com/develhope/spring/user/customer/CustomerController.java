@@ -7,6 +7,9 @@ import com.develhope.spring.rent.rentdto.RentNetworkResponse;
 import com.develhope.spring.rent.rentdto.CustomerRentRequest;
 import com.develhope.spring.user.Users;
 import com.develhope.spring.user.userdto.UserNetworkResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +29,11 @@ public class CustomerController {
 
     //Creare un ordine a partire da un veicolo contrassegnato come ordinabile
     //ok
+    @Operation(summary = "Create a Order", description = "Create a Order")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order created"),
+            @ApiResponse(responseCode = "600", description = "This user doesn't exist or is not a customer"),
+            @ApiResponse(responseCode = "601", description = "You can't order this vehicle, wrong vehicle status") })
     @PostMapping("/createOrder")
     public ResponseEntity<?> createOrder(@AuthenticationPrincipal Users customer, @RequestBody CustomerOrderRequest orderRequest) {
         CustomerOrderNetworkResponse response = customerService.createOrder(customer, orderRequest);

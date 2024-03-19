@@ -189,7 +189,7 @@ public class CustomerService {
         Optional<Vehicle> vehicle = vehicleRepository.findById(orderRequestRefactor.getIdVehicle());
         boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.NOT_AVAILABLE);
         if (!vehicleCheck) {
-            return CustomerOrderNetworkResponse.Error.builder().code(600).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
+            return CustomerOrderNetworkResponse.Error.builder().code(601).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
 
 
