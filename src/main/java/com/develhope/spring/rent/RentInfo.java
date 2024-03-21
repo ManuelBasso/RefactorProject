@@ -35,21 +35,4 @@ public class RentInfo {
         @ManyToOne
         @JoinColumn(name = "seller_id")
         private Users seller;
-
-        // TODO totalCost should be calculated by the program, not the user
-
-        /*
-         * public RentInfo(Double totalCost) {
-         * this.totalCost = calculateTotalCost(dailyCost, startDate, endDate);
-         * }
-         * 
-         * private Double calculateTotalCost(Double dailyCost, OffsetDateTime startDate,
-         * OffsetDateTime endDate){
-         * Double rentHourlyCost = dailyCost/24;
-         * Duration timeDifference = Duration.between(startDate, endDate);
-         * Long rentTimeInHours = timeDifference.toHours(); //Payment is calculated
-         * based on whole hours of rent time
-         * return rentHourlyCost * rentTimeInHours;
-         * }
-         */
 }
