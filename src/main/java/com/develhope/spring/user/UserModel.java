@@ -1,6 +1,8 @@
 package com.develhope.spring.user;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.develhope.spring.role.Role;
@@ -10,6 +12,7 @@ import com.develhope.spring.user.userdto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
 
 @Data
 @NoArgsConstructor
@@ -21,7 +24,7 @@ public class UserModel {
     private String lastName;
     private String email;
     private String password;
-    private Set<Role> role = new HashSet<>();
+    private Set<Role> role;
 
     public static UserModel mapEntityToModel(Users users) {
         return new UserModel(
@@ -50,8 +53,11 @@ public class UserModel {
                 userModel.getLastName(),
                 userModel.getEmail(),
                 userModel.getPassword(),
-                userModel.getRole());
+                convertRoleToString(userModel.getRole()));
     }
+
+
+
 
     public static UserModel mapRequestToModel(UserRequest userRequest) {
         return new UserModel(
@@ -60,8 +66,55 @@ public class UserModel {
                 userRequest.getLastName(),
                 userRequest.getEmail(),
                 userRequest.getPassword(),
-                userRequest.getRole());
+                convertStringToRole(userRequest.getRole())
+        );
     }
 
+    private static Set<Role> convertStringToRole(Set<String> role) {
+        Set<Role> rolesSet = new HashSet<>();
+        Role roleToAdd = new Role();
+
+        for (String roleString : role){
+            switch (roleString){
+                case "ROLE_ADMIN":
+                    roleToAdd.setId(null);
+                    roleToAdd.setName(Role.RoleType.ROLE_ADMIN);
+                    break;
+                case "ROLE_CUSTOMER":
+                    roleToAdd.setId(null);
+                    roleToAdd.setName(Role.RoleType.ROLE_CUSTOMER);
+                    break;
+                case "ROLE_SELLER":
+                    roleToAdd.setId(null);
+                    roleToAdd.setName(Role.RoleType.ROLE_SELLER);
+                    break;
+                default:
+                    return null;
+            }
+            rolesSet.add(roleToAdd);
+        }
+        return rolesSet;
+    }
+
+    private static Set<String> convertRoleToString(Set<Role> roles) {
+        Set<String> rolesString = new HashSet<>();
+        for (Role role : roles){
+            switch (role.getName().toString()){
+                case "ROLE_ADMIN":
+                    rolesString.add("ROLE_ADMIN");
+                    break;
+                case "ROLE_CUSTOMER":
+                    rolesString.add("ROLE_CUSTOMER");
+                    break;
+                case "ROLE_SELLER":
+                    rolesString.add("ROLE_SELLER");
+                    break;
+                default:
+                    return null;
+            }
+        }
+        return rolesString;
+    }
 }
+
 

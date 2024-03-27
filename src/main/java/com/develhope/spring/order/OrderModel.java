@@ -1,17 +1,23 @@
 package com.develhope.spring.order;
 
 import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.car.VehicleModel;
+import com.develhope.spring.order.orderdto.CustomerOrderResponse;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
+import com.develhope.spring.user.UserModel;
 import com.develhope.spring.user.Users;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderModel {
+
+
     private Long orderId;
     private Double advancePayment;
     private Boolean paidInFull;
@@ -19,6 +25,8 @@ public class OrderModel {
     private Users seller;
     private Vehicle vehicle;
     private OrderStatus orderStatus;
+
+
 
     public static OrderModel mapEntityToModel(OrderInfo orderInfo) {
         return new OrderModel(
@@ -53,6 +61,21 @@ public class OrderModel {
                 orderModel.getOrderStatus());
     }
 
+    public static CustomerOrderResponse mapModelToCustomerOrderResponse(OrderModel orderModel){
+        UserModel userModel = UserModel.mapEntityToModel(orderModel.getCustomer());
+        VehicleModel vehicleModel = VehicleModel.mapEntityToModel(orderModel.getVehicle());
+
+
+        return new CustomerOrderResponse(
+                orderModel.getOrderId(),
+                orderModel.getAdvancePayment(),
+                orderModel.getPaidInFull(),
+                UserModel.mapModelToResponse(userModel),
+                VehicleModel.mapModelToResponse(vehicleModel),
+                orderModel.getOrderStatus()
+        );
+    }
+
     public static OrderModel mapRequestToModel(OrderRequest orderRequest) {
         return new OrderModel(
                 null,
@@ -63,5 +86,7 @@ public class OrderModel {
                 orderRequest.getVehicle(),
                 orderRequest.getOrderStatus());
     }
+
+
 
 }
