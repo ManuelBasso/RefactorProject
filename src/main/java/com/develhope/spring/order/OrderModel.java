@@ -1,12 +1,12 @@
 package com.develhope.spring.order;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleModel;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleModel;
 import com.develhope.spring.order.orderdto.CustomerOrderResponse;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.user.UserModel;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -21,26 +21,26 @@ public class OrderModel {
     private Long orderId;
     private Double advancePayment;
     private Boolean paidInFull;
-    private Users customer;
-    private Users seller;
+    private User customer;
+    private User seller;
     private Vehicle vehicle;
     private OrderStatus orderStatus;
 
 
 
-    public static OrderModel mapEntityToModel(OrderInfo orderInfo) {
+    public static OrderModel mapEntityToModel(Order order) {
         return new OrderModel(
-                orderInfo.getOrderId(),
-                orderInfo.getAdvancePayment(),
-                orderInfo.getPaidInFull(),
-                orderInfo.getCustomer(),
-                orderInfo.getSeller(),
-                orderInfo.getVehicle(),
-                orderInfo.getOrderStatus());
+                order.getOrderId(),
+                order.getAdvancePayment(),
+                order.getPaidInFull(),
+                order.getCustomer(),
+                order.getSeller(),
+                order.getVehicle(),
+                order.getOrderStatus());
     }
 
-    public static OrderInfo mapModelToEntity(OrderModel orderModel) {
-        return new OrderInfo(
+    public static Order mapModelToEntity(OrderModel orderModel) {
+        return new Order(
                 orderModel.getOrderId(),
                 orderModel.getAdvancePayment(),
                 orderModel.getPaidInFull(),

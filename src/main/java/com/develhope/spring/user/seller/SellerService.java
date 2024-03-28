@@ -1,20 +1,20 @@
 package com.develhope.spring.user.seller;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleRepository;
-import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleRepository;
+import com.develhope.spring.vehicle.VehicleStatus;
+import com.develhope.spring.order.Order;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.Rent;
 import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.user.UserRepository;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import org.apache.commons.lang3.EnumUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatusCode;
@@ -44,20 +44,20 @@ public class SellerService {
         return vehicleRepository.findById(id);
     }
 
-    public OrderInfo getOneOrderById(Long id) {
+    public Order getOneOrderById(Long id) {
         return orderRepository.getById(id);
     }
 
-    public ResponseEntity<String> createOrderOfAvailableVehicle(Users seller, Long customerId, Long vehicleId, OrderInfo order) {
+    public ResponseEntity<String> createOrderOfAvailableVehicle(User seller, Long customerId, Long vehicleId, Order order) {
         try {
             Optional<Vehicle> vehicleToOrder = vehicleRepository.findById(vehicleId);
-            Optional<Users> supposedCustomer = userRepository.findById(customerId);
-            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.ROLE_CUSTOMER);
+            Optional<User> supposedCustomer = userRepository.findById(customerId);
+            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.CUSTOMER);
 
             if (supposedCustomer.isEmpty() || !checkCustomer){
                 return ResponseEntity.status(HttpStatusCode.valueOf(403)).body("Invalid customer ID");
             } else if(vehicleToOrder.isPresent() && vehicleToOrder.get().getIsAvailable() == VehicleStatus.AVAILABLE) {
-                OrderInfo newOrder = new OrderInfo();
+                Order newOrder = new Order();
                 newOrder.setAdvancePayment(order.getAdvancePayment());
                 newOrder.setPaidInFull(order.getPaidInFull());
                 newOrder.setOrderStatus(order.getOrderStatus());
@@ -76,8 +76,8 @@ public class SellerService {
         }
     }
 
-    public ResponseEntity<String> modifyOrder(Long orderId, OrderInfo newOrder) {
-        OrderInfo orderToModify = orderRepository.getById(orderId);
+    public ResponseEntity<String> modifyOrder(Long orderId, Order newOrder) {
+        Order orderToModify = orderRepository.getById(orderId);
         if (orderToModify != null) {
             orderToModify.setAdvancePayment(newOrder.getAdvancePayment());
             orderToModify.setPaidInFull(newOrder.getPaidInFull());
@@ -89,7 +89,7 @@ public class SellerService {
     }
 
     public ResponseEntity<String> getOrderStatus(Long orderId) {
-        Optional<OrderInfo> checkOrder = orderRepository.findById(orderId);
+        Optional<Order> checkOrder = orderRepository.findById(orderId);
         if(checkOrder.isEmpty()){
             return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Order with ID[" +orderId +"] doesn't exist");
         }
@@ -97,7 +97,7 @@ public class SellerService {
     }
 
     public ResponseEntity<String> updateOrderStatus(Long orderId, String newOrderStatus) {
-        OrderInfo orderToUpdateStatus = orderRepository.getById(orderId);
+        Order orderToUpdateStatus = orderRepository.getById(orderId);
         boolean checkStatus = EnumUtils.isValidEnum(OrderStatus.class, newOrderStatus);
         if(!checkStatus){
             return ResponseEntity.status(HttpStatusCode.valueOf(406)).body("[" +newOrderStatus +"] is not a valid Order status");
@@ -122,11 +122,11 @@ public class SellerService {
         return ResponseEntity.ok("All [" +status +"] orders are: \n" +orderRepository.findByOrderStatus(status));
     }
 
-    public ResponseEntity<String> createRent(Users seller, Long customerId, Long vehicleId, RentInfo newRentOrder) {
+    public ResponseEntity<String> createRent(User seller, Long customerId, Long vehicleId, Rent newRentOrder) {
         try {
             Optional<Vehicle> vehicleToRent = vehicleRepository.findById(vehicleId);
-            Optional<Users> supposedCustomer = userRepository.findById(customerId);
-            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.ROLE_CUSTOMER);
+            Optional<User> supposedCustomer = userRepository.findById(customerId);
+            Boolean checkCustomer = checkRole(supposedCustomer, Role.RoleType.CUSTOMER);
 
             if (supposedCustomer.isEmpty() || !checkCustomer){
                 return ResponseEntity.status(HttpStatusCode.valueOf(403)).body("Invalid customer ID");
@@ -139,7 +139,7 @@ public class SellerService {
                 newRentRequest.setEndDate(newRentOrder.getEndDate());
                 newRentRequest.setDailyCost(newRentRequest.getDailyCost());
                 newRentRequest.setIsPaid(false);
-                vehicleToRent.get().setIsAvailable(VehicleStatus.RENTED);
+                vehicleToRent.get().setIsAvailable(VehicleStatus.RENT);
 
                 String startDate = newRentOrder.getStartDate();
                 String endDate = newRentOrder.getEndDate();
@@ -147,8 +147,8 @@ public class SellerService {
                 newRentRequest.setTotalCost(calculateTotalCost(startDate, endDate, dailyCost));
 
                 RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
-                RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
-                RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+                Rent rent = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+                RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rent));
 
                 return ResponseEntity.ok("Rent order placed successfully\n" +rentResponse);
             } else if (vehicleToRent.get().getIsAvailable() != VehicleStatus.RENTABLE) {
@@ -160,8 +160,8 @@ public class SellerService {
         }
     }
 
-    public ResponseEntity<String> updateRent(Long rentId, RentInfo updatedRentOrder) {
-        RentInfo rentToModify = rentRepository.getById(rentId);
+    public ResponseEntity<String> updateRent(Long rentId, Rent updatedRentOrder) {
+        Rent rentToModify = rentRepository.getById(rentId);
         if (rentToModify != null) {
             RentRequest newRentRequest = new RentRequest();
             newRentRequest.setStartDate(updatedRentOrder.getStartDate());
@@ -170,8 +170,8 @@ public class SellerService {
             newRentRequest.setIsPaid(false);
 
             RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
-            RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
-            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+            Rent rent = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rent));
             return ResponseEntity.ok("Rent modified successfully!/n" +rentResponse);
         }
         return ResponseEntity.status(HttpStatusCode.valueOf(404)).body("Rent order with ID[" +rentId +"] doesn't exist");
@@ -180,7 +180,7 @@ public class SellerService {
 
     //Utilities
 
-    public Boolean checkRole(Optional<Users> user, Role.RoleType roleUser) {
+    public Boolean checkRole(Optional<User> user, Role.RoleType roleUser) {
         boolean check = false;
         if (user.isPresent()) {
             for (Role role : user.get().getRole()) {

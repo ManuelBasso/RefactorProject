@@ -21,9 +21,9 @@ public class Role {
 
     public enum RoleType {
 
-        ROLE_CUSTOMER,
-        ROLE_SELLER,
-        ROLE_ADMIN
+        CUSTOMER,
+        SELLER,
+        ADMIN
 
     }
 }

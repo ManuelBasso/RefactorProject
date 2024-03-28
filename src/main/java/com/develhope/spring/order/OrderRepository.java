@@ -4,21 +4,21 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import org.springframework.stereotype.Repository;
 
-import com.develhope.spring.car.Vehicle;
+import com.develhope.spring.vehicle.Vehicle;
 
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OrderRepository extends JpaRepository<OrderInfo, Long> {
+public interface OrderRepository extends JpaRepository<Order, Long> {
 
-    List<OrderInfo> findByOrderStatus(OrderStatus status);
+    List<Order> findByOrderStatus(OrderStatus status);
 
     // Da testare
-    List<OrderInfo> findByCustomer_Id(long userId);
+    List<Order> findByCustomer_Id(long userId);
 
 
-    Optional<OrderInfo> findByVehicleAndOrderStatus(Vehicle vehicle, OrderStatus completed);
+    Optional<Order> findByVehicleAndOrderStatus(Vehicle vehicle, OrderStatus completed);
 
     void deleteByCustomer_Id(Long userId);
 

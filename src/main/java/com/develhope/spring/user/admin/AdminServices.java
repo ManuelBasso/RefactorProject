@@ -9,31 +9,31 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleModel;
-import com.develhope.spring.car.VehicleRepository;
-import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.car.cardto.VehicleRequest;
-import com.develhope.spring.car.cardto.VehicleResponse;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleModel;
+import com.develhope.spring.vehicle.VehicleRepository;
+import com.develhope.spring.vehicle.VehicleStatus;
+import com.develhope.spring.vehicle.vehicledto.VehicleRequest;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
 import com.develhope.spring.configurations.exception.OrderRentCreationException;
-import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.order.Order;
 import com.develhope.spring.order.OrderModel;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
-import com.develhope.spring.purchase.PurchaseInfo;
+import com.develhope.spring.purchase.Purchase;
 import com.develhope.spring.purchase.PurchaseModel;
 import com.develhope.spring.purchase.PurchaseRepository;
 import com.develhope.spring.purchase.purchasedto.PurchaseRequest;
 import com.develhope.spring.purchase.purchasedto.PurchaseResponse;
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.Rent;
 import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role.RoleType;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import com.develhope.spring.user.UserRepository;
 
 @Service
@@ -178,9 +178,9 @@ public class AdminServices {
 
     // ottenere tutti gli ordini
     public List<OrderResponse> getOrder() {
-        List<OrderInfo> response = orderRepository.findAll();
+        List<Order> response = orderRepository.findAll();
         List<OrderResponse> result = new ArrayList<>();
-        for (OrderInfo order : response) {
+        for (Order order : response) {
             OrderModel orderModel = OrderModel.mapEntityToModel(order);
             result.add(OrderModel.mapModelToResponse(orderModel));
         }
@@ -190,7 +190,7 @@ public class AdminServices {
     // creazione ordine per un utente tramite id
     public OrderResponse createOrderForAUser(Long user_id, Long vehicle_id, boolean advance)
             throws OrderRentCreationException {
-        Optional<Users> user = userRepository.findById(user_id);
+        Optional<User> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -212,8 +212,8 @@ public class AdminServices {
             vehicleRepository.save(vehicle.get());
 
             OrderModel orderModel = OrderModel.mapRequestToModel(newOrderRequest);
-            OrderInfo orderInfo = orderRepository.save(OrderModel.mapModelToEntity(orderModel));
-            OrderResponse orderResponse = OrderModel.mapModelToResponse(OrderModel.mapEntityToModel(orderInfo));
+            Order order = orderRepository.save(OrderModel.mapModelToEntity(orderModel));
+            OrderResponse orderResponse = OrderModel.mapModelToResponse(OrderModel.mapEntityToModel(order));
 
             return orderResponse;
         } catch (Exception e) {
@@ -231,9 +231,9 @@ public class AdminServices {
 
     // eliminazione di un ordine per un cliente tramite id
     public boolean deleteOrder(Long id) {
-        Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
+        Optional<Order> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
-            OrderInfo order = optionalOrder.get();
+            Order order = optionalOrder.get();
             Long vehicleId = order.getVehicle().getVehicleId();
             orderRepository.deleteById(id);
 
@@ -251,12 +251,12 @@ public class AdminServices {
     // modifica di un ordine
     public OrderResponse modifyOrderBy(Long id, String choice, OrderRequest orderRequest,
             Long customerId, Long sellerId, Long vehicleId) {
-        Optional<OrderInfo> optionalOrder = orderRepository.findById(id);
+        Optional<Order> optionalOrder = orderRepository.findById(id);
         if (optionalOrder.isPresent()) {
-            OrderInfo orderRequestEntity = optionalOrder.get();
+            Order orderRequestEntity = optionalOrder.get();
 
-            boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
-            boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
+            boolean isValidCustomer = checkUserRoles(customerId, RoleType.CUSTOMER);
+            boolean isValidSeller = checkUserRoles(sellerId, RoleType.SELLER);
             if (!isValidCustomer || !isValidSeller) {
                 return null;
             }
@@ -272,11 +272,11 @@ public class AdminServices {
                     orderRequestEntity.setAdvancePayment(orderRequest.getAdvancePayment());
                     break;
                 case "Customer":
-                    Users customer = userRepository.getReferenceById(customerId);
+                    User customer = userRepository.getReferenceById(customerId);
                     orderRequestEntity.setCustomer(customer);
                     break;
                 case "Seller":
-                    Users seller = userRepository.getReferenceById(sellerId);
+                    User seller = userRepository.getReferenceById(sellerId);
                     orderRequestEntity.setSeller(seller);
                     break;
                 case "Vehicle":
@@ -290,7 +290,7 @@ public class AdminServices {
 
                     break;
             }
-            OrderInfo modifiedOrder = orderRepository.saveAndFlush(orderRequestEntity);
+            Order modifiedOrder = orderRepository.saveAndFlush(orderRequestEntity);
             OrderModel modifiedOrderModel = OrderModel.mapEntityToModel(modifiedOrder);
             OrderResponse orderResponse = OrderModel.mapModelToResponse(modifiedOrderModel);
             return orderResponse;
@@ -299,13 +299,13 @@ public class AdminServices {
     }
 
     private boolean checkUserRoles(Long userId, RoleType requiredRole) {
-        Optional<Users> user = userRepository.findById(userId);
+        Optional<User> user = userRepository.findById(userId);
         return user.isPresent() && user.get().getRole().stream()
                 .anyMatch(role -> role.getName() == requiredRole);
     }
 
     // modifica di tutti i parametri un ordine
-    private void modifyAllPartOfOrder(OrderInfo orderRequestEntity, OrderRequest orderRequest) {
+    private void modifyAllPartOfOrder(Order orderRequestEntity, OrderRequest orderRequest) {
         orderRequestEntity.setAdvancePayment(orderRequest.getAdvancePayment());
         orderRequestEntity.setCustomer(orderRequest.getCustomer());
         orderRequestEntity.setOrderStatus(orderRequest.getOrderStatus());
@@ -319,9 +319,9 @@ public class AdminServices {
 
     // ottenere tutti i noleggi
     public List<RentResponse> getallRent() {
-        List<RentInfo> response = rentRepository.findAll();
+        List<Rent> response = rentRepository.findAll();
         List<RentResponse> result = new ArrayList<>();
-        for (RentInfo rent : response) {
+        for (Rent rent : response) {
             RentModel rentModel = RentModel.mapEntityToModel(rent);
             result.add(RentModel.mapModelToResponse(rentModel));
         }
@@ -332,7 +332,7 @@ public class AdminServices {
     public RentResponse createRentForAUser(Long user_id, Long vehicle_id, String startDate,
             String endDate,
             Double dailyCost) throws OrderRentCreationException {
-        Optional<Users> user = userRepository.findById(user_id);
+        Optional<User> user = userRepository.findById(user_id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -357,8 +357,8 @@ public class AdminServices {
             vehicleRepository.save(vehicle.get());
 
             RentModel rentModel = RentModel.mapRequestToModel(newRentRequest);
-            RentInfo rentInfo = rentRepository.save(RentModel.mapModelToEntity(rentModel));
-            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rentInfo));
+            Rent rent = rentRepository.save(RentModel.mapModelToEntity(rentModel));
+            RentResponse rentResponse = RentModel.mapModelToResponse(RentModel.mapEntityToModel(rent));
             return rentResponse;
 
         } catch (Exception e) {
@@ -380,9 +380,9 @@ public class AdminServices {
 
     // eliminazione di un noleggio per un cliente tramite id
     public boolean deleteRent(Long id) {
-        Optional<RentInfo> optionalRent = rentRepository.findById(id);
+        Optional<Rent> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
-            RentInfo rent = optionalRent.get();
+            Rent rent = optionalRent.get();
             Long vehicleId = rent.getVehicle().getVehicleId();
             rentRepository.deleteById(id);
 
@@ -400,12 +400,12 @@ public class AdminServices {
     // modifica di un noleggio
     public RentResponse modifyRentById(Long id, String choice, RentRequest rentRequest, Long customerId,
             Long vehicleId, Long sellerId) {
-        Optional<RentInfo> optionalRent = rentRepository.findById(id);
+        Optional<Rent> optionalRent = rentRepository.findById(id);
         if (optionalRent.isPresent()) {
 
-            RentInfo rentRequestEntity = optionalRent.get();
-            boolean isValidCustomer = checkUserRoles(customerId, RoleType.ROLE_CUSTOMER);
-            boolean isValidSeller = checkUserRoles(sellerId, RoleType.ROLE_SELLER);
+            Rent rentRequestEntity = optionalRent.get();
+            boolean isValidCustomer = checkUserRoles(customerId, RoleType.CUSTOMER);
+            boolean isValidSeller = checkUserRoles(sellerId, RoleType.SELLER);
             if (!isValidCustomer || !isValidSeller) {
                 return null;
             }
@@ -429,11 +429,11 @@ public class AdminServices {
                     rentRequestEntity.setEndDate(rentRequest.getEndDate());
                     break;
                 case "customer":
-                    Users customer = userRepository.getReferenceById(customerId);
+                    User customer = userRepository.getReferenceById(customerId);
                     rentRequestEntity.setCustomer(customer);
                     break;
                 case "seller":
-                    Users seller = userRepository.getReferenceById(sellerId);
+                    User seller = userRepository.getReferenceById(sellerId);
                     rentRequestEntity.setSeller(seller);
                     break;
                 case "Vehicle":
@@ -447,7 +447,7 @@ public class AdminServices {
 
                     break;
             }
-            RentInfo modifiedRent = rentRepository.saveAndFlush(rentRequestEntity);
+            Rent modifiedRent = rentRepository.saveAndFlush(rentRequestEntity);
             RentModel modifiedRentModel = RentModel.mapEntityToModel(modifiedRent);
             RentResponse rentResponse = RentModel.mapModelToResponse(modifiedRentModel);
 
@@ -457,7 +457,7 @@ public class AdminServices {
     }
 
     // modifica di tutti i parametri di un noleggio
-    private void modifyAllPartOfRent(RentInfo rentRequestEntity, RentRequest rentRequest) {
+    private void modifyAllPartOfRent(Rent rentRequestEntity, RentRequest rentRequest) {
         rentRequestEntity.setStartDate(rentRequest.getStartDate());
         rentRequestEntity.setEndDate(rentRequest.getEndDate());
         rentRequestEntity.setDailyCost(rentRequest.getDailyCost());
@@ -473,9 +473,9 @@ public class AdminServices {
 
     // ottieni tutti gli acquisti
     public List<PurchaseResponse> getPurchase() {
-        List<PurchaseInfo> response = purchaseRepository.findAll();
+        List<Purchase> response = purchaseRepository.findAll();
         List<PurchaseResponse> result = new ArrayList<>();
-        for (PurchaseInfo purchase : response) {
+        for (Purchase purchase : response) {
             PurchaseModel purchaseModel = PurchaseModel.mapEntityToModel(purchase);
             result.add(PurchaseModel.mapModelToResponse(purchaseModel));
         }
@@ -484,7 +484,7 @@ public class AdminServices {
 
     // crea un acquisto per un utente
     public PurchaseResponse createPurchaseForAUser(Long id, Long vehicle_Id) {
-        Optional<Users> user = userRepository.findById(id);
+        Optional<User> user = userRepository.findById(id);
         Optional<Vehicle> vehicle = vehicleRepository.findById(vehicle_Id);
         if (!user.isPresent() || !vehicle.isPresent()) {
             throw new OrderRentCreationException("Invalid user or vehicle ID");
@@ -494,7 +494,7 @@ public class AdminServices {
             throw new OrderRentCreationException("Vehicle is not available for purchase or is already bought");
         }
 
-        Optional<OrderInfo> order = orderRepository.findByVehicleAndOrderStatus(vehicle.get(),
+        Optional<Order> order = orderRepository.findByVehicleAndOrderStatus(vehicle.get(),
                 OrderStatus.COMPLETED);
         if (order.isPresent() && order.get().getCustomer().equals(user.get())) {
             return purchaseIfOrderExist(vehicle, order);
@@ -504,7 +504,7 @@ public class AdminServices {
 
     }
 
-    private PurchaseResponse purchaseWithoutOrder(Optional<Users> user, Optional<Vehicle> vehicle) {
+    private PurchaseResponse purchaseWithoutOrder(Optional<User> user, Optional<Vehicle> vehicle) {
         PurchaseRequest newPurchaseRequest = new PurchaseRequest();
         newPurchaseRequest.setCustomer(user.get());
         newPurchaseRequest.setVehicle(vehicle.get());
@@ -515,10 +515,10 @@ public class AdminServices {
             vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
             vehicleRepository.save(vehicle.get());
 
-            PurchaseInfo newPurchaseInfo = PurchaseModel.mapModelToEntity(newPurchaseModel);
-            PurchaseInfo savedPurchaseInfo = purchaseRepository.save(newPurchaseInfo);
+            Purchase newPurchase = PurchaseModel.mapModelToEntity(newPurchaseModel);
+            Purchase savedPurchase = purchaseRepository.save(newPurchase);
             PurchaseResponse purchaseResponse = PurchaseModel.mapModelToResponse(
-                    PurchaseModel.mapEntityToModel(savedPurchaseInfo));
+                    PurchaseModel.mapEntityToModel(savedPurchase));
 
             return purchaseResponse;
         } catch (Exception e) {
@@ -526,7 +526,7 @@ public class AdminServices {
         }
     }
 
-    public PurchaseResponse purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<OrderInfo> order) {
+    public PurchaseResponse purchaseIfOrderExist(Optional<Vehicle> vehicle, Optional<Order> order) {
         PurchaseRequest purchaseRequest = new PurchaseRequest();
         purchaseRequest.setCustomer(order.get().getCustomer());
         purchaseRequest.setVehicle(order.get().getVehicle());
@@ -538,10 +538,10 @@ public class AdminServices {
             vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
             vehicleRepository.save(vehicle.get());
 
-            PurchaseInfo newPurchaseInfo = PurchaseModel.mapModelToEntity(newPurchaseModel);
-            PurchaseInfo savedPurchaseInfo = purchaseRepository.save(newPurchaseInfo);
+            Purchase newPurchase = PurchaseModel.mapModelToEntity(newPurchaseModel);
+            Purchase savedPurchase = purchaseRepository.save(newPurchase);
             PurchaseResponse purchaseResponse = PurchaseModel.mapModelToResponse(
-                    PurchaseModel.mapEntityToModel(savedPurchaseInfo));
+                    PurchaseModel.mapEntityToModel(savedPurchase));
 
             return purchaseResponse;
         } catch (Exception e) {
@@ -551,9 +551,9 @@ public class AdminServices {
 
     // elimina un acquisto per un utente
     public boolean deletePurchase(Long id) {
-        Optional<PurchaseInfo> optionalPurchase = purchaseRepository.findById(id);
+        Optional<Purchase> optionalPurchase = purchaseRepository.findById(id);
         if (optionalPurchase.isPresent()) {
-            PurchaseInfo purchase = optionalPurchase.get();
+            Purchase purchase = optionalPurchase.get();
             Long vehicleId = purchase.getVehicle().getVehicleId();
             purchaseRepository.deleteById(id);
 

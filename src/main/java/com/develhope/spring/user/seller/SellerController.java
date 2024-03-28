@@ -1,14 +1,14 @@
 package com.develhope.spring.user.seller;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleRepository;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleRepository;
 
-import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.order.Order;
 import com.develhope.spring.order.OrderRepository;
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.Rent;
 import com.develhope.spring.rent.RentService;
 
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -56,7 +56,7 @@ public class SellerController {
                         @ApiResponse(responseCode = "400", description = "Invalid vehicle ID or order details supplied"),
                         @ApiResponse(responseCode = "404", description = "No vehicle with that ID") })
         @PostMapping("/createorder/{customerId}/{vehicleId}")
-        public ResponseEntity<String> createOrder(@AuthenticationPrincipal Users seller, @PathVariable Long customerId, @PathVariable Long vehicleId, @RequestBody OrderInfo newOrder) {
+        public ResponseEntity<String> createOrder(@AuthenticationPrincipal User seller, @PathVariable Long customerId, @PathVariable Long vehicleId, @RequestBody Order newOrder) {
                 return sellerService.createOrderOfAvailableVehicle(seller, customerId, vehicleId, newOrder);
         }
 
@@ -78,7 +78,7 @@ public class SellerController {
                         @ApiResponse(responseCode = "400", description = "Invalid order ID or order details supplied"),
                         @ApiResponse(responseCode = "404", description = "No order with that ID") })
         @PutMapping("/modifyorder/{idOrderToModify}")
-        public ResponseEntity<String> modifyOrder(@PathVariable Long idOrderToModify, @RequestBody OrderInfo modifiedOrder) {
+        public ResponseEntity<String> modifyOrder(@PathVariable Long idOrderToModify, @RequestBody Order modifiedOrder) {
                 return sellerService.modifyOrder(idOrderToModify, modifiedOrder);
         }
 
@@ -110,7 +110,7 @@ public class SellerController {
         }
 
         @PostMapping("/createrentorder/{customerId}/{vehicleId}")
-        public ResponseEntity<String> createRentOrder(@AuthenticationPrincipal Users seller,@PathVariable Long customerId,@PathVariable Long vehicleId, @RequestBody RentInfo newRentOrder) {
+        public ResponseEntity<String> createRentOrder(@AuthenticationPrincipal User seller, @PathVariable Long customerId, @PathVariable Long vehicleId, @RequestBody Rent newRentOrder) {
                 return sellerService.createRent(seller, customerId, vehicleId, newRentOrder);
         }
 
@@ -120,7 +120,7 @@ public class SellerController {
         }
 
         @PutMapping("/modifyrentorder/{orderId}")
-        public ResponseEntity<String> modifyRentOrder(@PathVariable Long orderId, @RequestBody RentInfo updatedRentOrder) {
+        public ResponseEntity<String> modifyRentOrder(@PathVariable Long orderId, @RequestBody Rent updatedRentOrder) {
                 return sellerService.updateRent(orderId, updatedRentOrder);
         }
 }

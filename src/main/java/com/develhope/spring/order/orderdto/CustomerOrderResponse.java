@@ -1,9 +1,7 @@
 package com.develhope.spring.order.orderdto;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.cardto.VehicleResponse;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
 import com.develhope.spring.order.OrderStatus;
-import com.develhope.spring.user.Users;
 import com.develhope.spring.user.userdto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;

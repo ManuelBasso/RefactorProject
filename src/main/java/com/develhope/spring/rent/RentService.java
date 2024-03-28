@@ -12,25 +12,25 @@ public class RentService {
     private RentRepository rentRepository;
 
     //NuovoNoleggio Service
-    public RentInfo createRent(RentInfo rent){
+    public Rent createRent(Rent rent){
         return rentRepository.save(rent);
     }
 
     //Tutti Noleggi Service
-    public List<RentInfo> getAllRents(){
+    public List<Rent> getAllRents(){
         return rentRepository.findAll();
     }
 
     //Noleggio tramite id (ricerca) Service
-    public Optional<RentInfo> getRentByID(Long id){
+    public Optional<Rent> getRentByID(Long id){
         return rentRepository.findById(id);
     }
 
     //Update rent tramite Body Service
-    public RentInfo updateRent(Long id,RentInfo rentDetails){
-        Optional<RentInfo> rent = rentRepository.findById(id);
+    public Rent updateRent(Long id, Rent rentDetails){
+        Optional<Rent> rent = rentRepository.findById(id);
         if(rent.isPresent()){
-            RentInfo updatedRent = rent.get();
+            Rent updatedRent = rent.get();
           //  updatedRent.setStartDate(rentDetails.getStartDate());
           //  updatedRent.setEndDate(rentDetails.getEndDate());
             updatedRent.setDailyCost(rentDetails.getDailyCost());

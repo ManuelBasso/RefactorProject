@@ -16,9 +16,10 @@ import lombok.*;
 @Entity
 @Inheritance(strategy = InheritanceType.JOINED)
 @Data
+@Table(name = "Users")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Users implements UserDetails {
+public class User implements UserDetails {
 
     @Id()
     @GeneratedValue(strategy = GenerationType.IDENTITY)
