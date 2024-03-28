@@ -1,7 +1,7 @@
 package com.develhope.spring.rent.rentdto;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +19,7 @@ public class RentResponse {
     private Double totalCost;
     private Boolean isPaid;
     private Vehicle vehicle;
-    private Users customer;
-    private Users seller;
+    private User customer;
+    private User seller;
 
 }

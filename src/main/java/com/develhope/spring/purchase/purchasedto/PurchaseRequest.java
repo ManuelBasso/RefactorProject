@@ -1,8 +1,8 @@
 package com.develhope.spring.purchase.purchasedto;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.order.Order;
+import com.develhope.spring.user.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class PurchaseRequest {
     private Double totalPrice;
-    private OrderInfo order;
-    private Users customer;
+    private Order order;
+    private User customer;
     private Vehicle vehicle;
 }

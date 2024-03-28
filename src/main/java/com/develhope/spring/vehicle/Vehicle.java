@@ -1,4 +1,4 @@
-package com.develhope.spring.car;
+package com.develhope.spring.vehicle;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

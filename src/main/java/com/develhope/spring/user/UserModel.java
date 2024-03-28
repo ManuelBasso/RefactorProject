@@ -1,8 +1,6 @@
 package com.develhope.spring.user;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 import com.develhope.spring.role.Role;
@@ -26,18 +24,18 @@ public class UserModel {
     private String password;
     private Set<Role> role;
 
-    public static UserModel mapEntityToModel(Users users) {
+    public static UserModel mapEntityToModel(User user) {
         return new UserModel(
-                users.getId(),
-                users.getFirstName(),
-                users.getLastName(),
-                users.getEmail(),
-                users.getPassword(),
-                users.getRole());
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getPassword(),
+                user.getRole());
     }
 
-    public static Users mapModelToEntity(UserModel userModel) {
-        return new Users(
+    public static User mapModelToEntity(UserModel userModel) {
+        return new User(
                 userModel.getId(),
                 userModel.getFirstName(),
                 userModel.getLastName(),
@@ -78,15 +76,15 @@ public class UserModel {
             switch (roleString){
                 case "ROLE_ADMIN":
                     roleToAdd.setId(null);
-                    roleToAdd.setName(Role.RoleType.ROLE_ADMIN);
+                    roleToAdd.setName(Role.RoleType.ADMIN);
                     break;
                 case "ROLE_CUSTOMER":
                     roleToAdd.setId(null);
-                    roleToAdd.setName(Role.RoleType.ROLE_CUSTOMER);
+                    roleToAdd.setName(Role.RoleType.CUSTOMER);
                     break;
                 case "ROLE_SELLER":
                     roleToAdd.setId(null);
-                    roleToAdd.setName(Role.RoleType.ROLE_SELLER);
+                    roleToAdd.setName(Role.RoleType.SELLER);
                     break;
                 default:
                     return null;

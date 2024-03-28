@@ -1,8 +1,7 @@
 package com.develhope.spring.order;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.purchase.PurchaseInfo;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -13,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Orders")
 @AllArgsConstructor
 @NoArgsConstructor
-public class OrderInfo {
+public class Order {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,11 +24,11 @@ public class OrderInfo {
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    private Users customer;
+    private User customer;
 
     @ManyToOne
     @JoinColumn(name = "seller_id")
-    private Users seller;
+    private User seller;
 
     @ManyToOne
     @JoinColumn(name = "vehicle_id")

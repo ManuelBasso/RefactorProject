@@ -1,8 +1,8 @@
 package com.develhope.spring.purchase;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.order.OrderInfo;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.order.Order;
+import com.develhope.spring.user.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -22,7 +22,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "purchases")
 @AllArgsConstructor
 @NoArgsConstructor
-public class PurchaseInfo {
+public class Purchase {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,11 +31,11 @@ public class PurchaseInfo {
     private Double totalPrice;
 
     @OneToOne
-    private OrderInfo order;
+    private Order order;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
-    private Users customer;
+    private User customer;
 
     @ManyToOne(cascade = CascadeType.REMOVE)
     @JoinColumn(name = "vehicle_id")

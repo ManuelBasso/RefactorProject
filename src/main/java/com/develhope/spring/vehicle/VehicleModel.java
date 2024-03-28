@@ -1,7 +1,7 @@
-package com.develhope.spring.car;
+package com.develhope.spring.vehicle;
 
-import com.develhope.spring.car.cardto.VehicleRequest;
-import com.develhope.spring.car.cardto.VehicleResponse;
+import com.develhope.spring.vehicle.vehicledto.VehicleRequest;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

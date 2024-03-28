@@ -17,31 +17,31 @@ public class RentController {
 
     //NuovoNoleggio
     @PostMapping("/create")
-    public ResponseEntity<RentInfo> createRent(@RequestBody RentInfo rent){
-        RentInfo newRent = rentService.createRent(rent);
+    public ResponseEntity<Rent> createRent(@RequestBody Rent rent){
+        Rent newRent = rentService.createRent(rent);
         return new ResponseEntity<>(newRent, HttpStatus.CREATED);
     }
 
     //Tutti i noleggi
     @GetMapping("/all")
-    public ResponseEntity<List<RentInfo>> getAllRents() {
-        List<RentInfo> rents = rentService.getAllRents();
+    public ResponseEntity<List<Rent>> getAllRents() {
+        List<Rent> rents = rentService.getAllRents();
         return new ResponseEntity<>(rents, HttpStatus.OK);
     }
 
     // Recupero di un noleggio per ID
     @GetMapping("/{id}")
-    public ResponseEntity<RentInfo> getRentById(@PathVariable Long id) {
-        Optional<RentInfo> rent = rentService.getRentByID(id);
+    public ResponseEntity<Rent> getRentById(@PathVariable Long id) {
+        Optional<Rent> rent = rentService.getRentByID(id);
         return rent.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
     // Aggiornamento di un noleggio
     @PutMapping("/update/{id}")
-    public ResponseEntity<RentInfo> updateRent(@PathVariable Long id, @RequestBody RentInfo rentDetails) {
+    public ResponseEntity<Rent> updateRent(@PathVariable Long id, @RequestBody Rent rentDetails) {
         try {
-            RentInfo updatedRent = rentService.updateRent(id, rentDetails);
+            Rent updatedRent = rentService.updateRent(id, rentDetails);
             return new ResponseEntity<>(updatedRent, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

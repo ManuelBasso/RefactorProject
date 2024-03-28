@@ -3,9 +3,9 @@ package com.develhope.spring.user.admin;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.car.cardto.VehicleRequest;
-import com.develhope.spring.car.cardto.VehicleResponse;
+import com.develhope.spring.vehicle.VehicleStatus;
+import com.develhope.spring.vehicle.vehicledto.VehicleRequest;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
 import com.develhope.spring.order.orderdto.OrderRequest;
 import com.develhope.spring.order.orderdto.OrderResponse;
 import com.develhope.spring.purchase.purchasedto.PurchaseResponse;

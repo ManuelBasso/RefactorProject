@@ -1,13 +1,13 @@
 package com.develhope.spring.rent;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleModel;
-import com.develhope.spring.car.cardto.VehicleResponse;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleModel;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
 import com.develhope.spring.rent.rentdto.CustomerRentResponse;
 import com.develhope.spring.rent.rentdto.RentRequest;
 import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.user.UserModel;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import com.develhope.spring.user.userdto.UserResponse;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,24 +26,24 @@ public class RentModel {
     private Double totalCost;
     private Boolean isPaid;
     private Vehicle vehicle;
-    private Users customer;
-    private Users seller;
+    private User customer;
+    private User seller;
 
-    public static RentModel mapEntityToModel(RentInfo rentInfo){
+    public static RentModel mapEntityToModel(Rent rent){
         return new RentModel(
-                rentInfo.getRentId(),
-                rentInfo.getStartDate(),
-                rentInfo.getEndDate(),
-                rentInfo.getDailyCost(),
-                rentInfo.getTotalCost(),
-                rentInfo.getIsPaid(),
-                rentInfo.getVehicle(),
-                rentInfo.getCustomer(),
-                rentInfo.getSeller()
+                rent.getRentId(),
+                rent.getStartDate(),
+                rent.getEndDate(),
+                rent.getDailyCost(),
+                rent.getTotalCost(),
+                rent.getIsPaid(),
+                rent.getVehicle(),
+                rent.getCustomer(),
+                rent.getSeller()
         );
     }
-    public static RentInfo mapModelToEntity(RentModel rentModel){
-        return new RentInfo(
+    public static Rent mapModelToEntity(RentModel rentModel){
+        return new Rent(
                 rentModel.getRentId(),
                 rentModel.getStartDate(),
                 rentModel.getEndDate(),

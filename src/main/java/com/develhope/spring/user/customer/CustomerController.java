@@ -1,11 +1,13 @@
 package com.develhope.spring.user.customer;
 
-import com.develhope.spring.car.cardto.VehicleNetworkResponse;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseNetworkResponse;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseRequest;
+import com.develhope.spring.vehicle.vehicledto.VehicleNetworkResponse;
 import com.develhope.spring.order.orderdto.CustomerOrderNetworkResponse;
 import com.develhope.spring.order.orderdto.CustomerOrderRequest;
 import com.develhope.spring.rent.rentdto.RentNetworkResponse;
 import com.develhope.spring.rent.rentdto.CustomerRentRequest;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import com.develhope.spring.user.userdto.UserNetworkResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,7 +37,7 @@ public class CustomerController {
             @ApiResponse(responseCode = "600", description = "This user doesn't exist or is not a customer"),
             @ApiResponse(responseCode = "601", description = "You can't order this vehicle, wrong vehicle status") })
     @PostMapping("/createOrder")
-    public ResponseEntity<?> createOrder(@AuthenticationPrincipal Users customer, @RequestBody CustomerOrderRequest orderRequest) {
+    public ResponseEntity<?> createOrder(@AuthenticationPrincipal User customer, @RequestBody CustomerOrderRequest orderRequest) {
         CustomerOrderNetworkResponse response = customerService.createOrder(customer, orderRequest);
 
         if (response instanceof CustomerOrderNetworkResponse.Success) {
@@ -50,19 +52,34 @@ public class CustomerController {
     }
 
     //Creare un acquisto a partire da un veicolo contrassegnato come acquistabile
+    @PostMapping("/createPurchase")
+    public ResponseEntity<?> createPurchase(@AuthenticationPrincipal User customer, @RequestBody CustomerPurchaseRequest purchaseRequest) {
+
+        CustomerPurchaseNetworkResponse response = customerService.createPurchase(customer, purchaseRequest);
+
+        if (response instanceof CustomerPurchaseNetworkResponse.Success) {
+            return ResponseEntity.ok(((CustomerPurchaseNetworkResponse.Success) response).getPurchaseResponse());
+
+        } else {
+
+            int code = ((CustomerPurchaseNetworkResponse.Error) response).getCode();
+            String description = ((CustomerPurchaseNetworkResponse.Error) response).getDescription();
+            return ResponseEntity.status(code).body(description);
+        }
+    }
 
 
     //Vedere i propri ordini
     //okkk
     @GetMapping("/getOrders")
-    public ResponseEntity<?> getOrders(@AuthenticationPrincipal Users customer) {
+    public ResponseEntity<?> getOrders(@AuthenticationPrincipal User customer) {
         return customerService.getOrders(customer);
     }
 
     //Ottenere i dettagli di un veicolo specifico
     //tested: ok
     @GetMapping("/getVehicle/{idVehicle}")
-    public ResponseEntity<?> getVehicle(@AuthenticationPrincipal Users customer, @PathVariable long idVehicle) {
+    public ResponseEntity<?> getVehicle(@AuthenticationPrincipal User customer, @PathVariable long idVehicle) {
         VehicleNetworkResponse response = customerService.getVehicle(idVehicle);
 
         if (response instanceof VehicleNetworkResponse.Success) {
@@ -80,14 +97,14 @@ public class CustomerController {
     //Cancellare un suo ordine
     //tested: ok
     @DeleteMapping("/deleteOrder/{idOrder}")
-    public ResponseEntity<?> deleteOrder(@AuthenticationPrincipal Users customer, @PathVariable long idOrder) {
+    public ResponseEntity<?> deleteOrder(@AuthenticationPrincipal User customer, @PathVariable long idOrder) {
         return customerService.deleteOrder(customer, idOrder);
     }
 
     //Creare un noleggio
     //tested: ok
     @PostMapping("/createRent")
-    public ResponseEntity<?> createRent(@AuthenticationPrincipal Users customer, @RequestBody CustomerRentRequest rentRequest) {
+    public ResponseEntity<?> createRent(@AuthenticationPrincipal User customer, @RequestBody CustomerRentRequest rentRequest) {
         RentNetworkResponse response = customerService.createRent(customer, rentRequest);
         if (response instanceof RentNetworkResponse.Success) {
             return ResponseEntity.ok(((RentNetworkResponse.Success) response).getRentResponse());
@@ -103,7 +120,7 @@ public class CustomerController {
     //Cancellare un noleggio
     //tested: ok
     @DeleteMapping("/deleteRent/{idRent}")
-    public ResponseEntity<?> deleteRent(@AuthenticationPrincipal Users customer, @PathVariable long idRent) {
+    public ResponseEntity<?> deleteRent(@AuthenticationPrincipal User customer, @PathVariable long idRent) {
         return customerService.deleteRent(customer, idRent);
     }
 
@@ -111,7 +128,7 @@ public class CustomerController {
     //Modificare i dati dell’utente
 
     @PutMapping("/updateFirstName")
-    public ResponseEntity<?> updateCustomerName(@AuthenticationPrincipal Users customer, @RequestParam String firstName) {
+    public ResponseEntity<?> updateCustomerName(@AuthenticationPrincipal User customer, @RequestParam String firstName) {
         UserNetworkResponse response = customerService.updateCustomerName(customer, firstName);
 
         if (response instanceof UserNetworkResponse.Success) {
@@ -124,7 +141,7 @@ public class CustomerController {
     }
 
     @PutMapping("/updateLastName")
-    public ResponseEntity<?> updateLastName(@AuthenticationPrincipal Users customer, @RequestParam String lastName) {
+    public ResponseEntity<?> updateLastName(@AuthenticationPrincipal User customer, @RequestParam String lastName) {
         UserNetworkResponse response = customerService.updateLastName(customer, lastName);
 
         if (response instanceof UserNetworkResponse.Success) {
@@ -137,7 +154,7 @@ public class CustomerController {
     }
 
     @PutMapping("/updateEmail")
-    public ResponseEntity<?> updateEmail(@AuthenticationPrincipal Users customer, @RequestParam String email) {
+    public ResponseEntity<?> updateEmail(@AuthenticationPrincipal User customer, @RequestParam String email) {
         UserNetworkResponse response = customerService.updateEmail(customer, email);
 
         if (response instanceof UserNetworkResponse.Success) {
@@ -151,7 +168,7 @@ public class CustomerController {
 
     //TODO validation using email
     @PutMapping("/updatePassword")
-    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal Users customer, @RequestParam String password) {
+    public ResponseEntity<?> updatePassword(@AuthenticationPrincipal User customer, @RequestParam String password) {
         UserNetworkResponse response = customerService.updatePassword(customer, password);
 
         if (response instanceof UserNetworkResponse.Success) {
@@ -164,7 +181,7 @@ public class CustomerController {
     }
 
     @PutMapping("/updateAll")
-    public ResponseEntity<?> updateAll(@AuthenticationPrincipal Users customer, @RequestBody Users newCustomer) {
+    public ResponseEntity<?> updateAll(@AuthenticationPrincipal User customer, @RequestBody User newCustomer) {
         UserNetworkResponse response = customerService.updateAll(customer, newCustomer);
 
         if (response instanceof UserNetworkResponse.Success) {
@@ -187,13 +204,13 @@ public class CustomerController {
     //Cancellare la propria utenza
     //TODO doesn't work
     @DeleteMapping("/delete")
-    public ResponseEntity<?> delete(@AuthenticationPrincipal Users customer) {
+    public ResponseEntity<?> delete(@AuthenticationPrincipal User customer) {
         return customerService.delete(customer);
     }
 
     //Ricercare un veicolo secondo diversi criteri (prezzo, colore, marca, modello, ecc)
     @GetMapping("/findVehicleByAttribute")
-    public ResponseEntity<?> getVehiclesByAttribute(@AuthenticationPrincipal Users customer, @RequestParam String attributeChoice, @RequestParam String attributeValue) {
+    public ResponseEntity<?> getVehiclesByAttribute(@AuthenticationPrincipal User customer, @RequestParam String attributeChoice, @RequestParam String attributeValue) {
         VehicleNetworkResponse response = customerService.getVehicleByAttribute(attributeChoice, attributeValue);
 
         if (response instanceof VehicleNetworkResponse.SuccessList) {

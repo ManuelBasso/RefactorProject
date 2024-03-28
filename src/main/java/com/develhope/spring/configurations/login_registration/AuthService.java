@@ -16,7 +16,7 @@ import com.develhope.spring.configurations.security.jwt.JWTUtils;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.role.RoleRepository;
 import com.develhope.spring.user.UserRepository;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 
 @Service
 public class AuthService {
@@ -39,11 +39,11 @@ public class AuthService {
     public ReqRes signUp(ReqRes registrationRequest) {
         ReqRes resp = new ReqRes();
         try {
-            Users users = new Users();
-            users.setFirstName(registrationRequest.getFirstName());
-            users.setLastName(registrationRequest.getLastName());
-            users.setEmail(registrationRequest.getEmail());
-            users.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+            User user = new User();
+            user.setFirstName(registrationRequest.getFirstName());
+            user.setLastName(registrationRequest.getLastName());
+            user.setEmail(registrationRequest.getEmail());
+            user.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
 
             
             Set<Role> savedRoles = new HashSet<>();
@@ -53,10 +53,10 @@ public class AuthService {
                 savedRoles.add(roleRepository.save(role)); 
             }
 
-            users.setRole(savedRoles); 
-            Users usersResult = userRepository.save(users);
-            if (usersResult != null && usersResult.getId() > 0) {
-                resp.setOurUsers(usersResult);
+            user.setRole(savedRoles);
+            User userResult = userRepository.save(user);
+            if (userResult != null && userResult.getId() > 0) {
+                resp.setOurUser(userResult);
                 resp.setMessage("user saved succesfully ");
                 resp.setStatusCode(200);
             }
@@ -93,7 +93,7 @@ public class AuthService {
     public ReqRes refreshToken(ReqRes refreshTokenRequiest) {
         ReqRes response = new ReqRes();
         String ourEmail = jwtUtils.extractUserName(refreshTokenRequiest.getToken());
-        Users user = userRepository.findByEmail(ourEmail).orElseThrow();
+        User user = userRepository.findByEmail(ourEmail).orElseThrow();
         if (jwtUtils.isTokenValid(refreshTokenRequiest.getToken(), user)) {
             var jwt = jwtUtils.generateToken(user);
             response.setStatusCode(200);

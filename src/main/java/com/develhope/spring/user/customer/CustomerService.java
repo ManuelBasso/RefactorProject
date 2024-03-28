@@ -1,31 +1,37 @@
 package com.develhope.spring.user.customer;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.car.VehicleModel;
-import com.develhope.spring.car.VehicleRepository;
+import com.develhope.spring.purchase.Purchase;
+import com.develhope.spring.purchase.PurchaseModel;
+import com.develhope.spring.purchase.PurchaseRepository;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseNetworkResponse;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseRequest;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseResponse;
+import com.develhope.spring.purchase.purchasedto.CustomerPurchaseResponseWithoutOrder;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.vehicle.VehicleModel;
+import com.develhope.spring.vehicle.VehicleRepository;
 
-import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.car.cardto.VehicleNetworkResponse;
-import com.develhope.spring.car.cardto.VehicleResponse;
-import com.develhope.spring.order.OrderInfo;
+import com.develhope.spring.vehicle.VehicleStatus;
+import com.develhope.spring.vehicle.vehicledto.VehicleNetworkResponse;
+import com.develhope.spring.vehicle.vehicledto.VehicleResponse;
+import com.develhope.spring.order.Order;
 import com.develhope.spring.order.OrderModel;
 import com.develhope.spring.order.OrderRepository;
 import com.develhope.spring.order.OrderStatus;
 import com.develhope.spring.order.orderdto.CustomerOrderResponse;
 import com.develhope.spring.order.orderdto.CustomerOrderNetworkResponse;
 import com.develhope.spring.order.orderdto.CustomerOrderRequest;
-import com.develhope.spring.rent.RentInfo;
+import com.develhope.spring.rent.Rent;
 import com.develhope.spring.rent.RentModel;
 import com.develhope.spring.rent.RentRepository;
 
 import com.develhope.spring.rent.rentdto.CustomerRentResponse;
 import com.develhope.spring.rent.rentdto.RentNetworkResponse;
 import com.develhope.spring.rent.rentdto.CustomerRentRequest;
-import com.develhope.spring.rent.rentdto.RentResponse;
 import com.develhope.spring.role.Role;
 import com.develhope.spring.role.RoleRepository;
 import com.develhope.spring.user.UserModel;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.user.User;
 import com.develhope.spring.user.UserRepository;
 import com.develhope.spring.user.userdto.UserNetworkResponse;
 import com.develhope.spring.user.userdto.UserResponse;
@@ -38,7 +44,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
-import static com.develhope.spring.role.Role.RoleType.ROLE_CUSTOMER;
+import static com.develhope.spring.role.Role.RoleType.CUSTOMER;
 
 @Service
 public class CustomerService {
@@ -54,6 +60,9 @@ public class CustomerService {
 
     @Autowired
     UserRepository userRepository;
+
+    @Autowired
+    PurchaseRepository purchaseRepository;
 
     @Autowired
     RoleRepository roleRepository;
@@ -74,8 +83,8 @@ public class CustomerService {
     }
 
 
-    public ResponseEntity<?> getOrders(Users customer) {
-        List<OrderInfo> myorders = orderRepository.findByCustomer_Id(customer.getId());
+    public ResponseEntity<?> getOrders(User customer) {
+        List<Order> myorders = orderRepository.findByCustomer_Id(customer.getId());
         if (myorders.isEmpty()) {
             return new ResponseEntity<>("this customer doesn't have any orders", HttpStatus.OK);
         }
@@ -83,8 +92,8 @@ public class CustomerService {
 
     }
 
-    public ResponseEntity<?> deleteOrder(Users customer, long idOrder) {
-        Optional<OrderInfo> orderToDelete = orderRepository.findById(idOrder);
+    public ResponseEntity<?> deleteOrder(User customer, long idOrder) {
+        Optional<Order> orderToDelete = orderRepository.findById(idOrder);
         if (orderToDelete.isPresent() && orderToDelete.get().getCustomer().equals(customer)) {
             orderRepository.deleteById(idOrder);
             return ResponseEntity.ok(true);
@@ -94,8 +103,8 @@ public class CustomerService {
     }
 
 
-    public ResponseEntity<?> deleteRent(Users customer, long idRent) {
-        Optional<RentInfo> rentToDelete = rentRepository.findById(idRent);
+    public ResponseEntity<?> deleteRent(User customer, long idRent) {
+        Optional<Rent> rentToDelete = rentRepository.findById(idRent);
         if (rentToDelete.isPresent() && rentToDelete.get().getCustomer().equals(customer)) {
             rentRepository.deleteById(idRent);
             return ResponseEntity.ok(true);
@@ -104,7 +113,7 @@ public class CustomerService {
         }
     }
 
-    public UserNetworkResponse updateCustomerName(Users customer, String newFirstName) {
+    public UserNetworkResponse updateCustomerName(User customer, String newFirstName) {
         if (newFirstName == null || newFirstName.isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
         } else {
@@ -118,7 +127,7 @@ public class CustomerService {
 
     }
 
-    public UserNetworkResponse updateLastName(Users customer, String newLastName) {
+    public UserNetworkResponse updateLastName(User customer, String newLastName) {
         if (newLastName == null || newLastName.isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
         } else {
@@ -131,7 +140,7 @@ public class CustomerService {
         }
     }
 
-    public UserNetworkResponse updateEmail(Users customer, String newEmail) {
+    public UserNetworkResponse updateEmail(User customer, String newEmail) {
         if (newEmail == null || newEmail.isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
         } else {
@@ -144,7 +153,7 @@ public class CustomerService {
         }
     }
 
-    public UserNetworkResponse updatePassword(Users customer, String newPassword) {
+    public UserNetworkResponse updatePassword(User customer, String newPassword) {
         if (newPassword == null || newPassword.isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
         } else {
@@ -157,7 +166,7 @@ public class CustomerService {
         }
     }
 
-    public UserNetworkResponse updateAll(Users customer, Users newCustomer) {
+    public UserNetworkResponse updateAll(User customer, User newCustomer) {
         if (newCustomer == null || newCustomer.getFirstName().isEmpty() || newCustomer.getLastName().isEmpty() || newCustomer.getEmail().isEmpty()) {
             return UserNetworkResponse.Error.builder().code(400).description("null value").build();
         } else {
@@ -173,15 +182,11 @@ public class CustomerService {
         }
     }
 
-   /* public ResponseEntity<Users> updatePassword(Users customer, String newEmail) {
-        customer.setEmail(newEmail);
-        return ResponseEntity.ok(userRepository.save(customer));
-    }*/
 
 
-    public CustomerOrderNetworkResponse createOrder(Users customer, CustomerOrderRequest orderRequestRefactor) {
+    public CustomerOrderNetworkResponse createOrder(User customer, CustomerOrderRequest orderRequestRefactor) {
         System.out.println(orderRequestRefactor);
-        Boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
+        Boolean customerCheck = checkRoleUser(customer, CUSTOMER);
         if (!customerCheck) {
             return CustomerOrderNetworkResponse.Error.builder().code(600).description("This user doesn't exist or is not a customer").build();
         }
@@ -201,7 +206,7 @@ public class CustomerService {
         newOrderModel.setVehicle(vehicle.get());
         newOrderModel.setSeller(null);
 
-        OrderInfo orderEntity = OrderModel.mapModelToEntity(newOrderModel);
+        Order orderEntity = OrderModel.mapModelToEntity(newOrderModel);
         orderRepository.saveAndFlush(orderEntity);
         OrderModel orderModel = OrderModel.mapEntityToModel(orderEntity);
         CustomerOrderResponse orderResponse = OrderModel.mapModelToCustomerOrderResponse(orderModel);
@@ -215,8 +220,8 @@ public class CustomerService {
     }
 
 
-    public RentNetworkResponse createRent(Users customer, CustomerRentRequest rentRequest) {
-        boolean customerCheck = checkRoleUser(customer, ROLE_CUSTOMER);
+    public RentNetworkResponse createRent(User customer, CustomerRentRequest rentRequest) {
+        boolean customerCheck = checkRoleUser(customer, CUSTOMER);
         if (!customerCheck) {
             return RentNetworkResponse.Error.builder().code(600).description("This user is not a Customer").build();
         }
@@ -226,7 +231,6 @@ public class CustomerService {
         if (!vehicleCheck) {
             return RentNetworkResponse.Error.builder().code(600).description("You can't rent this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
         }
-
 
         RentModel newModelRent = new RentModel(null,
                 rentRequest.getStartDate(),
@@ -238,7 +242,7 @@ public class CustomerService {
                 customer,
                 null);
 
-        RentInfo rentEntity = RentModel.mapModelToEntity(newModelRent);
+        Rent rentEntity = RentModel.mapModelToEntity(newModelRent);
         rentRepository.saveAndFlush(rentEntity);
         RentModel rentModel = RentModel.mapEntityToModel(rentEntity);
         CustomerRentResponse rentResponse = RentModel.mapModelToCustomerRentResponse(rentModel);
@@ -246,7 +250,93 @@ public class CustomerService {
 
     }
 
-    public ResponseEntity<?> delete(Users customer) {
+    public CustomerPurchaseNetworkResponse createPurchase(User customer, CustomerPurchaseRequest purchaseRequest) {
+        if (purchaseRequest.getIdOrder() == null){
+            return CreatePurchaseWithoutOrder(customer, purchaseRequest);
+        }
+
+        Optional<Order> orderInfo = orderRepository.findById(purchaseRequest.getIdOrder());
+
+        if (orderInfo.isEmpty()) {
+            return CustomerPurchaseNetworkResponse.Error.builder().code(515).description("This order doesn't exist").build();
+        } else {
+            return CreatePurchaseFromOrder(customer, purchaseRequest);
+        }
+    }
+    private CustomerPurchaseNetworkResponse CreatePurchaseFromOrder(User customer, CustomerPurchaseRequest purchaseRequest) {
+        Boolean customerCheck = checkRoleUser(customer, CUSTOMER);
+        if (!customerCheck) {
+            return CustomerPurchaseNetworkResponse.Error.builder().code(600).description("This user doesn't exist or is not a customer").build();
+        }
+
+        Optional<Vehicle> vehicle = vehicleRepository.findById(purchaseRequest.getIdVehicle());
+        boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
+        if (!vehicleCheck) {
+            return CustomerPurchaseNetworkResponse.Error.builder().code(601).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
+        }
+
+        Optional<Order> orderInfo = orderRepository.findById(purchaseRequest.getIdOrder());
+
+
+        PurchaseModel purchaseModel = new PurchaseModel();
+        purchaseModel.setTotalPrice(purchaseRequest.getTotalPrice() - orderInfo.get().getAdvancePayment() );
+        purchaseModel.setOrder(orderInfo.get());
+        purchaseModel.setCustomer(customer);
+        purchaseModel.setVehicle(vehicle.get());
+
+        Purchase purchaseEntity = PurchaseModel.mapModelToEntity(purchaseModel);
+        purchaseRepository.saveAndFlush(purchaseEntity);
+        purchaseModel = PurchaseModel.mapEntityToModel(purchaseEntity);
+
+        CustomerPurchaseResponse purchaseResponse = PurchaseModel.mapModelToCustomerResponse(purchaseModel);
+
+        vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
+        vehicleRepository.saveAndFlush(vehicle.get());
+
+        //orderRepository.deleteById(purchaseRequest.getIdOrder());
+
+        return CustomerPurchaseNetworkResponse.Success.builder().purchaseResponse(purchaseResponse).build();
+
+    }
+
+
+    private CustomerPurchaseNetworkResponse CreatePurchaseWithoutOrder(User customer, CustomerPurchaseRequest purchaseRequest) {
+        Boolean customerCheck = checkRoleUser(customer, CUSTOMER);
+        if (!customerCheck) {
+            return CustomerPurchaseNetworkResponse.Error.builder().code(600).description("This user doesn't exist or is not a customer").build();
+        }
+
+        Optional<Vehicle> vehicle = vehicleRepository.findById(purchaseRequest.getIdVehicle());
+        boolean vehicleCheck = checkVehicle(vehicle, VehicleStatus.AVAILABLE);
+        if (!vehicleCheck) {
+            return CustomerPurchaseNetworkResponse.Error.builder().code(601).description("You can't order this vehicle because the status of the vehicle is: " + vehicle.get().getIsAvailable()).build();
+        }
+
+        PurchaseModel purchaseModel = new PurchaseModel();
+        purchaseModel.setTotalPrice(purchaseRequest.getTotalPrice());
+        purchaseModel.setCustomer(customer);
+        purchaseModel.setVehicle(vehicle.get());
+
+        Purchase purchaseEntity = new Purchase();
+        purchaseEntity.setTotalPrice(purchaseModel.getTotalPrice());
+        purchaseEntity.setCustomer(purchaseModel.getCustomer());
+        purchaseEntity.setVehicle(purchaseModel.getVehicle());
+
+        purchaseRepository.saveAndFlush(purchaseEntity);
+        purchaseModel = PurchaseModel.mapEntityToModel(purchaseEntity);
+        CustomerPurchaseResponse purchaseResponse = PurchaseModel.mapModelToCustomerResponseOrderNull(purchaseModel);
+
+        vehicle.get().setIsAvailable(VehicleStatus.BOUGHT);
+        vehicleRepository.saveAndFlush(vehicle.get());
+
+        return CustomerPurchaseNetworkResponse.Success.builder().purchaseResponse(purchaseResponse).build();
+
+
+    }
+
+
+
+    public ResponseEntity<?> delete(User customer) {
         orderRepository.deleteByCustomer_Id(customer.getId());
         rentRepository.deleteByCustomer_Id(customer.getId());
         roleRepository.deleteById(customer.getId());
@@ -332,7 +422,7 @@ public class CustomerService {
 
     //Utilities
 
-    public Boolean checkRoleUser(Optional<Users> user, Role.RoleType roleUser) {
+    public Boolean checkRoleUser(Optional<User> user, Role.RoleType roleUser) {
         boolean check = false;
         if (user.isPresent()) {
             for (Role role : user.get().getRole()) {
@@ -344,7 +434,7 @@ public class CustomerService {
         return check;
     }
 
-    public Boolean checkRoleUser(Users user, Role.RoleType roleUser) {
+    public Boolean checkRoleUser(User user, Role.RoleType roleUser) {
         boolean check = false;
         if (user != null) {
             for (Role role : user.getRole()) {

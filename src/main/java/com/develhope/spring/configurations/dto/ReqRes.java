@@ -4,8 +4,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
@@ -28,5 +28,5 @@ public class ReqRes {
     private String lastName;
     private Set<String> role = new HashSet<>();
     private List<Vehicle> vehicles;
-    private Users ourUsers;
+    private User ourUser;
 }

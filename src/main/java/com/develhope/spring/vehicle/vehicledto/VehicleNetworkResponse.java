@@ -1,6 +1,5 @@
-package com.develhope.spring.car.cardto;
+package com.develhope.spring.vehicle.vehicledto;
 
-import com.fasterxml.jackson.core.JsonFactory;
 import lombok.Builder;
 import lombok.Data;
 

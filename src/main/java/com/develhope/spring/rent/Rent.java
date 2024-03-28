@@ -1,7 +1,7 @@
 package com.develhope.spring.rent;
 
-import com.develhope.spring.car.Vehicle;
-import com.develhope.spring.user.Users;
+import com.develhope.spring.vehicle.Vehicle;
+import com.develhope.spring.user.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @Table(name = "Rents")
 @AllArgsConstructor
 @NoArgsConstructor
-public class RentInfo {
+public class Rent {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,9 +30,9 @@ public class RentInfo {
 
         @ManyToOne
         @JoinColumn(name = "customer_id")
-        private Users customer;
+        private User customer;
 
         @ManyToOne
         @JoinColumn(name = "seller_id")
-        private Users seller;
+        private User seller;
 }

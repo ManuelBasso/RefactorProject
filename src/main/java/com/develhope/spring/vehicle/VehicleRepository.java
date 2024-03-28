@@ -1,4 +1,4 @@
-package com.develhope.spring.car;
+package com.develhope.spring.vehicle;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

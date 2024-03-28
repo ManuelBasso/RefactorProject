@@ -1,7 +1,7 @@
-package com.develhope.spring.car.cardto;
+package com.develhope.spring.vehicle.vehicledto;
 
-import com.develhope.spring.car.VehicleStatus;
-import com.develhope.spring.car.VehicleType;
+import com.develhope.spring.vehicle.VehicleStatus;
+import com.develhope.spring.vehicle.VehicleType;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class VehicleResponse {
-    private Long vehicleId;
+public class VehicleRequest {
     private String brand;
     private String model;
     private String color;
@@ -27,5 +26,4 @@ public class VehicleResponse {
     private Boolean isNew;
     private VehicleType vehicleType;
     private VehicleStatus isAvailable;
-
 }
